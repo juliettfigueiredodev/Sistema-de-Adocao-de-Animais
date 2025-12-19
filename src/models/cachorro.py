@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from .animal import Animal, ValorInvalidoError
-from .animal_status import AnimalStatus
+from models.animal import Animal, ValorInvalidoError
+from models.animal_status import AnimalStatus
 
 
 class Cachorro(Animal):
