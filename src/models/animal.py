@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Iterator, List, Optional
 from uuid import uuid4
 
-from .animal_status import AnimalStatus, validar_transicao
+from models.animal_status import AnimalStatus, validar_transicao
 
 
 class ValorInvalidoError(ValueError):
