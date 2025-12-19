@@ -7,10 +7,6 @@ from models.animal_status import AnimalStatus
 
 
 class Gato(Animal):
-    """
-    Gato é um Animal com atributo específico:
-    - independencia (0 a 10)
-    """
 
     def __init__(
         self,
