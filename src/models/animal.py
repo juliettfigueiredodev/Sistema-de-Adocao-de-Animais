@@ -10,13 +10,11 @@ from models.animal_status import AnimalStatus, validar_transicao
 
 
 class ValorInvalidoError(ValueError):
-    """Erro genérico para validações de domínio (idade, porte, campos obrigatórios etc.)."""
     pass
 
 
 @dataclass(frozen=True)
 class AnimalEvent:
-    """Evento imutável do histórico do animal."""
     tipo: str
     detalhes: str
     timestamp: str  # ISO8601
@@ -28,15 +26,6 @@ class AnimalEvent:
 
 
 class Animal(ABC):
-    """
-    Entidade principal do domínio (abstrata).
-    Regras essenciais:
-    - idade_meses >= 0
-    - porte ∈ {"P","M","G"}
-    - status segue transições válidas
-    - mantém histórico de eventos
-    """
-
     PORTES_VALIDOS = {"P", "M", "G"}
 
     def __init__(
@@ -77,9 +66,8 @@ class Animal(ABC):
         self._historico: List[AnimalEvent] = []
         self._registrar_evento("ENTRADA", f"Animal cadastrado com status {self._status.value}")
 
-    # -----------------
     # Métodos especiais
-    # -----------------
+
     def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}(id={self.id!r}, nome={self.nome!r}, "
@@ -111,19 +99,13 @@ class Animal(ABC):
     @property
     @abstractmethod
     def especie_padrao(self) -> str:
-        """
-        Cada subclasse define a espécie padrão.
-        Isso garante que Animal não seja instanciada diretamente.
-        """
         raise NotImplementedError
 
-    # -----------------
     # Propriedades
-    # -----------------
+    
     @property
     def id(self) -> str:
         return self._id
-
 
     @property
     def data_entrada(self) -> str:
@@ -212,7 +194,6 @@ class Animal(ABC):
             if not isinstance(item, str) or not item.strip():
                 raise ValorInvalidoError("Temperamento deve conter apenas strings não vazias.")
             limpo.append(item.strip().lower())
-        # remove duplicados preservando ordem
         seen = set()
         final: List[str] = []
         for t in limpo:
@@ -225,14 +206,9 @@ class Animal(ABC):
     def status(self) -> AnimalStatus:
         return self._status
 
-    # -----------------
     # Regras de domínio
-    # -----------------
+    
     def mudar_status(self, novo_status: AnimalStatus, motivo: str = "") -> None:
-        """
-        Muda o status do animal, respeitando a tabela de transições permitidas.
-        Registra evento no histórico.
-        """
         validar_transicao(self._status, novo_status)
         anterior = self._status
         self._status = novo_status
@@ -248,9 +224,8 @@ class Animal(ABC):
     def _registrar_evento(self, tipo: str, detalhes: str) -> None:
         self._historico.append(AnimalEvent.novo(tipo=tipo, detalhes=detalhes))
 
-    # -----------------
     # Persistência (ajuda no JSON depois)
-    # -----------------
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
