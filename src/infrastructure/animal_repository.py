@@ -93,10 +93,6 @@ class AnimalRepository:
 
     # Persistência
     def load(self) -> None:
-        """
-        Carrega do JSON para memória.
-        Se não existir arquivo, só começa vazio (sem erro).
-        """
         if not self._path.exists():
             return
 
