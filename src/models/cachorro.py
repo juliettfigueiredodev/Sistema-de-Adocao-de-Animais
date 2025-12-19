@@ -7,10 +7,6 @@ from models.animal_status import AnimalStatus
 
 
 class Cachorro(Animal):
-    """
-    Cachorro é um Animal com atributo específico:
-    - necessidade_passeio (0 a 10)
-    """
 
     def __init__(
         self,
