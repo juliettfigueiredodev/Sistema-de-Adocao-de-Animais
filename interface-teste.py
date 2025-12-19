@@ -31,8 +31,14 @@ def main():
         temperamento=["tranquilo"],
     )
 
+ja_tem_dog = any(a.nome == dog.nome and a.especie == dog.especie for a in repo.list())
+ja_tem_cat = any(a.nome == cat.nome and a.especie == cat.especie for a in repo.list())
+
+if not ja_tem_dog:
     repo.add(dog)
+if not ja_tem_cat:
     repo.add(cat)
+
 
     # 3) listar por status
     disponiveis = repo.list(status=AnimalStatus.DISPONIVEL)
@@ -53,3 +59,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
