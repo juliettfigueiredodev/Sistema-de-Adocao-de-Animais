@@ -9,7 +9,6 @@ from models.cachorro import Cachorro
 from models.gato import Gato
 from models.animal import Animal
 
-
 class AnimalNaoEncontradoError(LookupError):
     pass
 
