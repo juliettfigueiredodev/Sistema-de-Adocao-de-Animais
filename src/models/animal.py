@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterator, List, Optional
@@ -108,12 +108,22 @@ class Animal(ABC):
         # Permite: for evento in animal
         return iter(self._historico)
 
+    @property
+    @abstractmethod
+    def especie_padrao(self) -> str:
+        """
+        Cada subclasse define a espécie padrão.
+        Isso garante que Animal não seja instanciada diretamente.
+        """
+        raise NotImplementedError
+
     # -----------------
     # Propriedades
     # -----------------
     @property
     def id(self) -> str:
         return self._id
+
 
     @property
     def data_entrada(self) -> str:
