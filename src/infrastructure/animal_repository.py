@@ -18,13 +18,6 @@ class AnimalDuplicadoError(ValueError):
 
 
 def animal_from_dict(data: Dict) -> Animal:
-    """
-    Reconstrói um Animal (Cachorro/Gato) a partir do dict salvo no JSON.
-
-    Por que existe?
-    - Porque JSON não sabe “reviver” classes automaticamente.
-    - Então precisamos mapear especie -> classe.
-    """
     status = AnimalStatus(data["status"])
 
     especie = data.get("especie")
@@ -60,18 +53,12 @@ def animal_from_dict(data: Dict) -> Animal:
 
 
 class AnimalRepository:
-    """
-    Repositório = “lugar único” para CRUD.
-    Por que isso é bom?
-    - Mantém regras de armazenamento separadas do domínio.
-    - Depois, se quiser trocar JSON por SQLite, muda aqui e o resto continua igual.
-    """
-
+    
     def __init__(self, arquivo_json: str = "data/animais.json") -> None:
         self._path = Path(arquivo_json)
         self._animais: Dict[str, Animal] = {}
 
-    # ---------- CRUD ----------
+    # CRUD
     def add(self, animal: Animal) -> None:
         if animal.id in self._animais:
             raise AnimalDuplicadoError(f"Já existe animal com id {animal.id}")
@@ -104,7 +91,7 @@ class AnimalRepository:
             animais = [a for a in animais if a.especie == especie]
         return sorted(animais)  # usa __lt__ (por data_entrada)
 
-    # ---------- Persistência ----------
+    # Persistência
     def load(self) -> None:
         """
         Carrega do JSON para memória.
@@ -119,10 +106,8 @@ class AnimalRepository:
             animal = animal_from_dict(item)
             self._animais[animal.id] = animal
 
-    def save(self) -> None:
-        """
-        Salva o estado atual em JSON.
-        """
+    def save(self) -> None: #Salva o estado atual em JSON.
+
         self._path.parent.mkdir(parents=True, exist_ok=True)
         data = [a.to_dict() for a in self._animais.values()]
         self._path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
