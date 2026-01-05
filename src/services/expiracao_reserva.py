@@ -30,6 +30,8 @@ class ExpiracaoReservaJob:
                 continue
 
             if ate <= agora:
+                print(f"[JOB] Expirando reserva: id={animal.id} nome={animal.nome} status={animal.status.value} reserva_ate={animal.reserva_ate}")
+
                 animal.mudar_status(AnimalStatus.DISPONIVEL, motivo="Reserva expirada")
                 animal.reservado_por = None
                 animal.reserva_ate = None
