@@ -21,7 +21,13 @@ class ExpiracaoReservaJob:
             if not animal.reserva_ate:
                 continue
 
-            ate = datetime.fromisoformat(animal.reserva_ate)
+            try:
+                ate = datetime.fromisoformat(animal.reserva_ate)
+                if ate.tzinfo is None:
+                    ate = ate.replace(tzinfo=timezone.utc)
+            except ValueError:
+                # se a data estiver em formato inválido, ignora
+                continue
 
             if ate <= agora:
                 animal.mudar_status(AnimalStatus.DISPONIVEL, motivo="Reserva expirada")
