@@ -40,9 +40,13 @@ class Animal(ABC):
         status: AnimalStatus = AnimalStatus.DISPONIVEL,
         animal_id: Optional[str] = None,
         data_entrada: Optional[str] = None,
+        reservado_por: Optional[str] = None,
+        reserva_ate: Optional[str] = None,
     ) -> None:
         self._id = animal_id or str(uuid4())
         self._data_entrada = data_entrada or datetime.now(timezone.utc).isoformat()
+        self._reservado_por = reservado_por
+        self._reserva_ate = reserva_ate
 
         self._especie = ""
         self._raca = ""
@@ -110,6 +114,22 @@ class Animal(ABC):
     @property
     def data_entrada(self) -> str:
         return self._data_entrada
+ 
+    @property
+    def reservado_por(self) -> Optional[str]:
+        return self._reservado_por
+
+    @reservado_por.setter
+    def reservado_por(self, value: Optional[str]) -> None:
+        self._reservado_por = value
+
+    @property
+    def reserva_ate(self) -> Optional[str]:
+        return self._reserva_ate
+
+    @reserva_ate.setter
+    def reserva_ate(self, value: Optional[str]) -> None:
+        self._reserva_ate = value
 
     @property
     def especie(self) -> str:
@@ -238,5 +258,7 @@ class Animal(ABC):
             "porte": self.porte,
             "temperamento": self.temperamento,
             "status": self.status.value,
+            "reservado_por": self.reservado_por,
+            "reserva_ate": self.reserva_ate,
             "historico": [e.__dict__ for e in self._historico],
         }
