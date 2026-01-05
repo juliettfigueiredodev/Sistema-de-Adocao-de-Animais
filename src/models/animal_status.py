@@ -21,7 +21,7 @@ class AnimalStatus(str, Enum):
 # Regras essenciais: transições permitidas
 TRANSICOES_PERMITIDAS: Dict[AnimalStatus, FrozenSet[AnimalStatus]] = {
     AnimalStatus.DISPONIVEL: frozenset({AnimalStatus.RESERVADO, AnimalStatus.INADOTAVEL}),
-    AnimalStatus.RESERVADO: frozenset({AnimalStatus.ADOTADO}),
+    AnimalStatus.RESERVADO: frozenset({AnimalStatus.ADOTADO, AnimalStatus.DISPONIVEL}),
     AnimalStatus.ADOTADO: frozenset({AnimalStatus.DEVOLVIDO}),
     AnimalStatus.DEVOLVIDO: frozenset({AnimalStatus.QUARENTENA, AnimalStatus.DISPONIVEL, AnimalStatus.INADOTAVEL}),
     AnimalStatus.QUARENTENA: frozenset({AnimalStatus.DISPONIVEL, AnimalStatus.INADOTAVEL}),
