@@ -2,7 +2,7 @@ from models.cachorro import Cachorro
 from models.gato import Gato
 from models.animal_status import AnimalStatus
 from infrastructure.animal_repository import AnimalRepository
-from services.expiracao_reserva_job import ExpiracaoReservaJob
+from services.expiracao_reserva import ExpiracaoReservaJob
 
 
 def main():
@@ -76,3 +76,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
