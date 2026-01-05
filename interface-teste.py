@@ -4,6 +4,8 @@ from models.animal_status import AnimalStatus
 from infrastructure.animal_repository import AnimalRepository
 from services.expiracao_reserva import ExpiracaoReservaJob
 from services.reserva_service import ReservaService
+from services.adocao_service import AdocaoService
+from services.taxa_adocao import TaxaPadrao
 
 
 def main():
@@ -63,9 +65,15 @@ def main():
     reserva_service = ReservaService(repo2, duracao_horas=0)
     rex = repo2.list(especie="Cachorro")[0]
     reserva_service.reservar(rex.id, "Fulano")
+    
+    # 7) adoção efetiva (gera contrato)
+    adocao_service = AdocaoService(repo2)
+    contrato = adocao_service.adotar(rex.id, "Fulano", strategy=TaxaPadrao())
+    print("\n--- CONTRATO GERADO ---\n")
+    print(contrato)
 
 
-    # 7) rodar job de expiração de reserva
+    # 8) rodar job de expiração de reserva
     job = ExpiracaoReservaJob(repo2)
     qtd = job.executar()
     print("Reservas expiradas:", qtd)
@@ -74,5 +82,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
