@@ -20,6 +20,8 @@ class Gato(Animal):
         status: AnimalStatus = AnimalStatus.DISPONIVEL,
         animal_id: Optional[str] = None,
         data_entrada: Optional[str] = None,
+        reservado_por: Optional[str] = None,
+        reserva_ate: Optional[str] = None,
     ) -> None:
         self._independencia = 0
         super().__init__(
@@ -33,6 +35,8 @@ class Gato(Animal):
             status=status,
             animal_id=animal_id,
             data_entrada=data_entrada,
+            reservado_por=reservado_por,
+            reserva_ate=reserva_ate,
         )
         self.independencia = independencia
 
