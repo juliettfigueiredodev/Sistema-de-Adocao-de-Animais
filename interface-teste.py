@@ -3,6 +3,7 @@ from models.gato import Gato
 from models.animal_status import AnimalStatus
 from infrastructure.animal_repository import AnimalRepository
 from services.expiracao_reserva import ExpiracaoReservaJob
+from services.reserva_service import ReservaService
 
 
 def main():
@@ -57,17 +58,14 @@ def main():
     repo2.load()
     print("\nRecarregado:", len(repo2.list()))
     print("Somente gatos:", [a.nome for a in repo2.list(especie="Gato")])
-    
-    # TESTE: forçar Rex como RESERVADO e com reserva vencida
-    rex = repo2.list(especie="Cachorro")[0]
-    rex.mudar_status(AnimalStatus.RESERVADO, motivo="Teste de expiração")
-    rex.reservado_por = "Fulano"
-    rex.reserva_ate = "2000-01-01T00:00:00+00:00"  # data bem antiga (vencida)
-    rex.registrar_evento("RESERVA", f"Teste: reservado até {rex.reserva_ate}")
-    repo2.update(rex)
-    repo2.save()
 
-    # 6) rodar job de expiração de reserva
+    # 6) reserva
+    reserva_service = ReservaService(repo2, duracao_horas=0)
+    rex = repo2.list(especie="Cachorro")[0]
+    reserva_service.reservar(rex.id, "Fulano")
+
+
+    # 7) rodar job de expiração de reserva
     job = ExpiracaoReservaJob(repo2)
     qtd = job.executar()
     print("Reservas expiradas:", qtd)
@@ -76,4 +74,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
