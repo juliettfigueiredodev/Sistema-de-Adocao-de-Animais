@@ -33,6 +33,8 @@ def animal_from_dict(data: Dict) -> Animal:
             status=status,
             animal_id=data["id"],
             data_entrada=data.get("data_entrada"),
+            reservado_por=data.get("reservado_por"),
+            reserva_ate=data.get("reserva_ate"),
         )
 
     if especie == "Gato":
@@ -47,6 +49,8 @@ def animal_from_dict(data: Dict) -> Animal:
             status=status,
             animal_id=data["id"],
             data_entrada=data.get("data_entrada"),
+            reservado_por=data.get("reservado_por"),
+            reserva_ate=data.get("reserva_ate"),
         )
 
     raise ValueError(f"Espécie desconhecida no JSON: {especie!r}")
