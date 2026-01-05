@@ -62,7 +62,7 @@ def main():
     print("Somente gatos:", [a.nome for a in repo2.list(especie="Gato")])
 
     # 6) reserva
-    reserva_service = ReservaService(repo2, duracao_horas=0)
+    reserva_service = ReservaService(repo2, duracao_horas=48)
     rex = repo2.list(especie="Cachorro")[0]
     reserva_service.reservar(rex.id, "Fulano")
     
@@ -82,6 +82,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
