@@ -12,10 +12,9 @@ from models.animal import Animal
 class AnimalNaoEncontradoError(LookupError):
     pass
 
-
+#evita id repetido
 class AnimalDuplicadoError(ValueError):
     pass
-
 
 def animal_from_dict(data: Dict) -> Animal:
     status = AnimalStatus(data["status"])
