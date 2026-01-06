@@ -78,7 +78,6 @@ class GestaoAnimalService:
             print(f"NOTIFICAÇÃO ENVIADA: Olá {proximo_adotante.nome}, o animal {animal.nome} está disponível para você!")
             
             # Atualiza status (Mantém reservado, mas agora para a nova pessoa)
-            # Na prática real, você atualizaria o ID do adotante no objeto Reserva
             print(f"Nova reserva iniciada para {proximo_adotante.nome}.")
             
         except FilaVaziaError:
