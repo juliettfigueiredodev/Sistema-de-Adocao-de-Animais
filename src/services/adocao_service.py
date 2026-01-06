@@ -26,7 +26,7 @@ class AdocaoService:
         if animal.status != AnimalStatus.RESERVADO:
             raise ValueError("Só é possível adotar animal com status RESERVADO.")
 
-        # Regra: o adotante precisa ser quem reservou
+        # Regra: o adotante precisa ser quem reservou (se tiver reservado_por preenchido)
         if animal.reservado_por and animal.reservado_por != adotante_nome:
             raise ValueError("Este animal está reservado por outra pessoa.")
 
@@ -36,13 +36,12 @@ class AdocaoService:
                 ate = datetime.fromisoformat(animal.reserva_ate)
                 if ate.tzinfo is None:
                     ate = ate.replace(tzinfo=timezone.utc)
-            except ValueError as exc:
-                raise ValueError("Data de reserva inválida. Faça uma nova reserva.") from exc
+            except ValueError:
+                raise ValueError("Data de reserva inválida. Faça uma nova reserva.")
 
             if ate <= datetime.now(timezone.utc):
                 raise ValueError("Reserva expirada. Faça uma nova reserva.")
 
-        # Estratégia de taxa
         strategy = strategy or TaxaPadrao()
         taxa = strategy.calcular(animal)
 
@@ -76,13 +75,12 @@ class AdocaoService:
         )
 
         # Salva contrato em arquivo
-        caminho = self._salvar_contrato_em_arquivo(
+        self._salvar_contrato_em_arquivo(
             contrato=contrato,
             animal_nome=animal.nome,
             adotante_nome=adotante_nome,
             data_iso=agora,
         )
-        print(f"[OK] Contrato salvo em: {caminho}")
 
         return contrato
 
@@ -93,16 +91,12 @@ class AdocaoService:
         adotante_nome: str,
         data_iso: str,
     ) -> Path:
-        # cria pasta se não existir
+        # Cria pasta se não existir
         self._pasta_contratos.mkdir(parents=True, exist_ok=True)
 
-        # nome de arquivo simples e seguro (sem caracteres problemáticos)
-        animal_safe = "".join(
-            c for c in animal_nome if c.isalnum() or c in (" ", "_", "-")
-        ).strip().replace(" ", "_")
-        adotante_safe = "".join(
-            c for c in adotante_nome if c.isalnum() or c in (" ", "_", "-")
-        ).strip().replace(" ", "_")
+        # Nome de arquivo simples e seguro
+        animal_safe = "".join(c for c in animal_nome if c.isalnum() or c in (" ", "_", "-")).strip().replace(" ", "_")
+        adotante_safe = "".join(c for c in adotante_nome if c.isalnum() or c in (" ", "_", "-")).strip().replace(" ", "_")
         data_safe = data_iso.replace(":", "-")
 
         arquivo = self._pasta_contratos / f"contrato_{animal_safe}_{adotante_safe}_{data_safe}.txt"
