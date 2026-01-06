@@ -12,7 +12,7 @@ from models.animal_status import AnimalStatus, validar_transicao
 class ValorInvalidoError(ValueError):
     pass
 
-
+#congela o valor
 @dataclass(frozen=True)
 class AnimalEvent:
     tipo: str
@@ -244,7 +244,7 @@ class Animal(ABC):
     def _registrar_evento(self, tipo: str, detalhes: str) -> None:
         self._historico.append(AnimalEvent.novo(tipo=tipo, detalhes=detalhes))
 
-    # Persistência (ajuda no JSON depois)
+    # Persistência (JSON)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
