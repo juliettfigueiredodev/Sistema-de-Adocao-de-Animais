@@ -1,6 +1,8 @@
 # Sistema-de-Adocao-de-Animais
 Projeto final da disciplina de POO
 
+<img width="631" height="546" alt="image" src="https://github.com/user-attachments/assets/b7df48ba-dbad-4248-b1dd-bb643c79a1f5" />
+
 ## Type hints
 Anotações de sintaxe para indicar o tipo de dado esperado para variáveis, parâmetros de funções e retornos de funções.
 Exemplos (criado por IA via busca no campo de pesquisa Google):
