@@ -1,6 +1,14 @@
-from src.models.pessoa import Pessoa # Importa a classe Pessoa do módulo pessoa
+from src.models.pessoa import Pessoa
 
-class Adotante(Pessoa): # Define a classe Adotante que herda de Pessoa
+
+class Adotante(Pessoa):
+    """
+    Representa uma pessoa interessada em adotar um animal.
+
+    Estende a classe Pessoa adicionando informações
+    necessárias para triagem e compatibilidade.
+    """
+
     def __init__(
         self,
         nome: str,
@@ -11,7 +19,7 @@ class Adotante(Pessoa): # Define a classe Adotante que herda de Pessoa
         criancas: bool,
         outros_animais: bool
     ):
-        super().__init__(nome, idade) # Chama o construtor da classe base Pessoa
+        super().__init__(nome, idade)
         self.moradia = moradia
         self.area_util = area_util
         self.experiencia = experiencia
