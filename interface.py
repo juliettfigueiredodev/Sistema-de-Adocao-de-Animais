@@ -1,6 +1,6 @@
 import time
 import os
-from .src import *
+from src import *
 
 def limpar_tela():
     # Verifica o nome do sistema operacional
