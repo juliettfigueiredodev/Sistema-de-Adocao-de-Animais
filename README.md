@@ -1,7 +1,14 @@
-# Sistema-de-Adocao-de-Animais
-Projeto final da disciplina de POO
+# Sistema de Adoção de Animais
+Projeto final da disciplina de POO 
 
 <img width="631" height="546" alt="image" src="https://github.com/user-attachments/assets/b7df48ba-dbad-4248-b1dd-bb643c79a1f5" />
+
+## Pré-requisitos
+Python 3
+Pytest
+
+## Como rodar
+
 
 Desenvolvido por: Juan Carlos, Juliett Figueirêdo, Leandro Pereira, Linderval Matias
 
