@@ -3,12 +3,7 @@ Projeto final da disciplina de POO
 
 <img width="631" height="546" alt="image" src="https://github.com/user-attachments/assets/b7df48ba-dbad-4248-b1dd-bb643c79a1f5" />
 
-Desenvolvido por:
-
-Juan Carlos
-Juliett Figueirêdo
-Leandro Pereira
-Linderval Matias
+Desenvolvido por: Juan Carlos, Juliett Figueirêdo, Leandro Pereira, Linderval Matias
 
 ## Type hints
 Anotações de sintaxe para indicar o tipo de dado esperado para variáveis, parâmetros de funções e retornos de funções.
