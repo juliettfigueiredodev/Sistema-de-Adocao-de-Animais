@@ -25,7 +25,7 @@ adotantes = [
     Adotante(
         nome="João",
         idade=16,  # propositalmente inválido
-        moradia="apto",
+        moradia="apartamento",
         area_util=50,
         experiencia=False,
         criancas=True,
