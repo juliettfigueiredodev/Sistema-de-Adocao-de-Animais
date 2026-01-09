@@ -1,94 +1,65 @@
-import time
-import os
-from .src import *
-
-def limpar_tela():
-    # Verifica o nome do sistema operacional
-    if os.name == 'nt': # Windows
-        os.system('cls')
-    else: # Linux, macOS 
-        os.system('clear')
-
-menu = '''
-    🐾🐾 Adote seu Humano! 🐾🐾
-
-    [p] Cadastrar pet 🐶
-    [h] Cadastrar humano👤
+from models.cachorro import Cachorro
+from models.gato import Gato
+from models.animal_status import AnimalStatus
+from infrastructure.animal_repository import AnimalRepository
+from services.expiracao_reserva import ExpiracaoReservaJob
+from services.reserva_service import ReservaService
+from services.adocao_service import AdocaoService
+from services.taxa_adocao import TaxaPadrao
 
 
-    [r] Reservar 🤩
-    [a] Adoção efetiva 😁
-    [d] Devolução 😿
-    [t] TOP 5 🔥
-    [S] Sair do sistema 🚶🏻
+def main():
+    repo = AnimalRepository("data/animais.json")
 
-    O que você quer fazer? => '''
+    repo.load()
+    print("Carregados do JSON:", len(repo.list()))
 
-while True:
-    opcao = input (menu)
+    dog = Cachorro(
+        raca="Vira-lata",
+        nome="Rex",
+        sexo="M",
+        idade_meses=24,
+        porte="M",
+        necessidade_passeio=7,
+        temperamento=["amigável", "brincalhão"],
+    )
+    cat = Gato(
+        raca="Siamês",
+        nome="Mia",
+        sexo="F",
+        idade_meses=12,
+        porte="P",
+        independencia=9,
+        temperamento=["tranquilo"],
+    )
 
-    if opcao == 'p':
-        limpar_tela()
-        # id_pet = len(pets) + 1
-        #cadastrar_pet(pets)
-    
-    elif opcao == 'h':
-        limpar_tela()
-        #  id_pessoa = len(pessoas) + 1
-        # cadastrar_humano(pessoas) 
-    
-    elif opcao == 'r':
-        limpar_tela()
-        # print(lista_pets)
-        # cod_reserva = input('Digite o código da reserva: ')
-        # reserva(cod_reserva)
-    
-    elif opcao == 'a':
-        limpar_tela()
-        pass
-    
-    elif opcao == 'd':
-        limpar_tela()
-        #implementar interface devolução
-        pass
+    if not any(a.nome == dog.nome and a.especie == dog.especie for a in repo.list()):
+        repo.add(dog)
+    if not any(a.nome == cat.nome and a.especie == cat.especie for a in repo.list()):
+        repo.add(cat)
 
-    elif opcao == 't':
-        limpar_tela()
-        #print(listar_top5())
-    
-    elif opcao == 'S':
-        print('🚶🏻🚶🏻🚶🏻🚶🏻🚶🏻')
-        break
+    repo.save()
 
-    else:
-        print('''
-    ⛔ Opção inválida, por favor selecione novamente a opção desejada.''')
-        time.sleep(1)
-        limpar_tela()
+    repo2 = AnimalRepository("data/animais.json")
+    repo2.load()
 
-#------------------------------------------------------------#
-#teste juan
-# from src.models.adotante import Adotante
+    rex = repo2.list(especie="Cachorro")[0]
+
+    # 1) reserva (48h)
+    reserva_service = ReservaService(repo2, duracao_horas=48)
+    reserva_service.reservar(rex.id, "Fulano")
+
+    # 2) adota
+    adocao_service = AdocaoService(repo2)
+    contrato = adocao_service.adotar(rex.id, "Fulano", strategy=TaxaPadrao())
+    print("\n--- CONTRATO GERADO ---\n")
+    print(contrato)
+
+    # 3) roda job (deve dar 0, porque já foi adotado e não está mais reservado)
+    job = ExpiracaoReservaJob(repo2)
+    qtd = job.executar()
+    print("Reservas expiradas:", qtd)
 
 
-# adotante = Adotante(
-#     nome="Maria",
-#     idade=25,
-#     moradia="casa",
-#     area_util=80,
-#     experiencia=True,
-#     criancas=False,
-#     outros_animais=True
-# )
-
-
-
-# print(adotante.nome)
-# print(adotante.idade)
-# print(adotante.moradia)
-# print(adotante.area_util)
-# print(adotante.experiencia)
-# print(adotante.criancas)
-# print(adotante.outros_animais)
-
-#------------------------------------------------------------#
+if __name__ == "__main__":
+    main()
