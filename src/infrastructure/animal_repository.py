@@ -14,6 +14,8 @@ from src.models.cachorro import Cachorro
 from src.models.gato import Gato
 
 
+"""Camada de persistência (Repository) para animais."""
+
 class AnimalNaoEncontradoError(LookupError):
     """
     Exceção lançada quando um animal não é encontrado no repositório.
@@ -249,6 +251,7 @@ class AnimalRepository:
             )
         self._animais[animal.id] = animal
 
+    """remove um animal pelo id."""
     def delete(self, animal_id: str) -> None:
         """
         Remove um animal do repositório.
@@ -267,7 +270,8 @@ class AnimalRepository:
                 f"Animal não encontrado para exclusão: {animal_id}"
             )
         del self._animais[animal_id]
-
+    
+    """Lista animais, com filtros opcionais por status e espécie. Retorna ordenado por data_entrada usando o __lt__ definido em Animal."""
     def list(
         self,
         status: Optional[AnimalStatus] = None,
