@@ -50,3 +50,7 @@ class RepositorioError(AdocaoError):
         >>> raise RepositorioError("Erro ao salvar no banco de dados")
     """
     pass
+
+
+class FilaVaziaError(Exception):    
+    pass
