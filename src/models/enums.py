@@ -1,9 +1,0 @@
-from enum import Enum
-
-class StatusAnimal(Enum):
-    DISPONIVEL = "DISPONIVEL"
-    RESERVADO = "RESERVADO"
-    ADOTADO = "ADOTADO"
-    DEVOLVIDO = "DEVOLVIDO"
-    QUARENTENA = "QUARENTENA"
-    INADOTAVEL = "INADOTAVEL"

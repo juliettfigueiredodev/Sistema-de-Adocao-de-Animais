@@ -1,5 +1,5 @@
 from datetime import datetime
-from src.models.enums import StatusAnimal
+from src.models.animal_status import AnimalStatus
 from src.validators.exceptions import TransicaoDeEstadoInvalidaError, FilaVaziaError
 
 class GestaoAnimalService:
@@ -8,7 +8,7 @@ class GestaoAnimalService:
         """
         Devolução registra motivo e ajusta status para DEVOLVIDO ou QUARENTENA.
         """
-        if animal.status != StatusAnimal.ADOTADO:
+        if animal.status != AnimalStatus.ADOTADO:
             raise TransicaoDeEstadoInvalidaError(f"Não é possível devolver um animal com status {animal.status}")
 
         print(f"--- Processando Devolução de {animal.nome} ---")
@@ -16,10 +16,10 @@ class GestaoAnimalService:
 
         # Lógica de decisão de status
         if problema_saude_comportamento:
-            animal.status = StatusAnimal.QUARENTENA
+            animal.status = AnimalStatus.QUARENTENA
             print(f"ALERTA: Animal movido para {animal.status.value} devido a problemas de saúde/comportamento.")
         else:
-            animal.status = StatusAnimal.DEVOLVIDO
+            animal.status = AnimalStatus.DEVOLVIDO
             print(f"Animal movido para status: {animal.status.value}.")
         
         # Registrar no histórico (conforme requisito [cite: 13])
@@ -36,7 +36,7 @@ class GestaoAnimalService:
         """
         Reavaliação pode migrar status para DISPONIVEL ou INADOTAVEL.
         """
-        status_permitidos = [StatusAnimal.QUARENTENA, StatusAnimal.DEVOLVIDO]
+        status_permitidos = [AnimalStatus.QUARENTENA, AnimalStatus.DEVOLVIDO]
         
         if animal.status not in status_permitidos:
             raise TransicaoDeEstadoInvalidaError(f"Apenas animais em Quarentena ou Devolvidos podem ser reavaliados. Status atual: {animal.status}")
@@ -44,10 +44,10 @@ class GestaoAnimalService:
         print(f"--- Reavaliando {animal.nome} ---")
         
         if apto_adocao:
-            animal.status = StatusAnimal.DISPONIVEL
+            animal.status = AnimalStatus.DISPONIVEL
             resultado = "Aprovado"
         else:
-            animal.status = StatusAnimal.INADOTAVEL
+            animal.status = AnimalStatus.INADOTAVEL
             resultado = "Reprovado"
 
         print(f"Resultado da reavaliação: {resultado}. Novo status: {animal.status.value}")
@@ -66,7 +66,7 @@ class GestaoAnimalService:
         Ao expirar reserva, notificar próximo da fila.
         """
         # Simulação: assumimos que a verificação de tempo já ocorreu e a reserva expirou
-        if animal.status != StatusAnimal.RESERVADO:
+        if animal.status != AnimalStatus.RESERVADO:
             print("Este animal não está reservado.")
             return
 
@@ -82,7 +82,7 @@ class GestaoAnimalService:
             
         except FilaVaziaError:
             # Se não tem ninguém na fila, volta a ficar disponível geral
-            animal.status = StatusAnimal.DISPONIVEL
+            animal.status = AnimalStatus.DISPONIVEL
             print(f"Ninguém na fila de espera. {animal.nome} voltou para status DISPONIVEL.")
 
         evento = {
