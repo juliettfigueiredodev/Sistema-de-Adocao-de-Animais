@@ -1,88 +1,65 @@
-# ------------------------------------------------------------
-# TESTE DE INTEGRAÇÃO - JUAN
-# Testa se triagem, compatibilidade e relatório estão funcionando juntos
-# ------------------------------------------------------------
+from models.cachorro import Cachorro
+from models.gato import Gato
+from models.animal_status import AnimalStatus
+from infrastructure.animal_repository import AnimalRepository
+from services.expiracao_reserva import ExpiracaoReservaJob
+from services.reserva_service import ReservaService
+from services.adocao_service import AdocaoService
+from services.taxa_adocao import TaxaPadrao
 
-from src.models.adotante import Adotante
-from src.services.triagem_service import TriagemService
-from src.services.relatorio_service import RelatorioService
 
+def main():
+    repo = AnimalRepository("data/animais.json")
 
-# ------------------------------------------------------------
-# Criando adotantes de teste
-# ------------------------------------------------------------
+    repo.load()
+    print("Carregados do JSON:", len(repo.list()))
 
-adotantes = [
-    Adotante(
-        nome="Maria",
-        idade=25,
-        moradia="casa",
-        area_util=80,
-        experiencia=True,
-        criancas=False,
-        outros_animais=True
-    ),
-    Adotante(
-        nome="João",
-        idade=16,  # propositalmente inválido
-        moradia="apartamento",
-        area_util=50,
-        experiencia=False,
-        criancas=True,
-        outros_animais=False
+    dog = Cachorro(
+        raca="Vira-lata",
+        nome="Rex",
+        sexo="M",
+        idade_meses=24,
+        porte="M",
+        necessidade_passeio=7,
+        temperamento=["amigável", "brincalhão"],
     )
-]
+    cat = Gato(
+        raca="Siamês",
+        nome="Mia",
+        sexo="F",
+        idade_meses=12,
+        porte="P",
+        independencia=9,
+        temperamento=["tranquilo"],
+    )
+
+    if not any(a.nome == dog.nome and a.especie == dog.especie for a in repo.list()):
+        repo.add(dog)
+    if not any(a.nome == cat.nome and a.especie == cat.especie for a in repo.list()):
+        repo.add(cat)
+
+    repo.save()
+
+    repo2 = AnimalRepository("data/animais.json")
+    repo2.load()
+
+    rex = repo2.list(especie="Cachorro")[0]
+
+    # 1) reserva (48h)
+    reserva_service = ReservaService(repo2, duracao_horas=48)
+    reserva_service.reservar(rex.id, "Fulano")
+
+    # 2) adota
+    adocao_service = AdocaoService(repo2)
+    contrato = adocao_service.adotar(rex.id, "Fulano", strategy=TaxaPadrao())
+    print("\n--- CONTRATO GERADO ---\n")
+    print(contrato)
+
+    # 3) roda job (deve dar 0, porque já foi adotado e não está mais reservado)
+    job = ExpiracaoReservaJob(repo2)
+    qtd = job.executar()
+    print("Reservas expiradas:", qtd)
 
 
-# ------------------------------------------------------------
-# Animal fake (simula o model Animal)
-# ------------------------------------------------------------
-
-class AnimalFake:
-    def __init__(self, nome, porte, temperamento):
-        self.nome = nome
-        self.porte = porte
-        self.temperamento = temperamento
-
-
-animais = [
-    AnimalFake("Rex", "G", ["brincalhao"]),
-    AnimalFake("Luna", "P", ["calmo"]),
-    AnimalFake("Thor", "G", ["arisco"])
-]
-
-
-# ------------------------------------------------------------
-# TESTE 1 — TRIAGEM + COMPATIBILIDADE
-# ------------------------------------------------------------
-
-triagem = TriagemService()
-
-print("TESTE DE TRIAGEM E COMPATIBILIDADE:\n")
-
-for animal in animais:
-    for adotante in adotantes:
-        try:
-            score = triagem.avaliar(adotante, animal)
-            print(
-                f"{adotante.nome} pode adotar {animal.nome} "
-                f"(score = {score})"
-            )
-        except Exception as e:
-            print(
-                f"{adotante.nome} NÃO pode adotar {animal.nome} → {e}"
-            )
-
-print("\n" + "-" * 50 + "\n")
-
-
-# ------------------------------------------------------------
-# TESTE 2 — RELATÓRIO (TOP ANIMAIS MAIS ADOTÁVEIS)
-# ------------------------------------------------------------
-
-relatorio = RelatorioService()
-top = relatorio.top_animais_adotaveis(animais, adotantes)
-
-print("TOP ANIMAIS MAIS ADOTÁVEIS:")
-for animal, media in top:
-    print(f"{animal.nome} - média de compatibilidade: {media:.1f}")
+if __name__ == "__main__":
+    main()
