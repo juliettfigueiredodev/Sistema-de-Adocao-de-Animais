@@ -1,184 +1,71 @@
-# Sistema de Adoção de Animais
+# Sobre o Projeto
+
+Sistema para gerenciar todo o fluxo de adoção de animais, incluindo cadastro, triagem de adotantes, reservas, adoções e relatórios estatísticos.
+
+**Principais funcionalidades:**
+- Cadastro de animais (cachorros e gatos) com validações
+- Triagem automática de adotantes por políticas configuráveis
+- Sistema de reservas com expiração automática
+- Cálculo de compatibilidade adotante-animal (score 0-100)
+- Geração de contratos de adoção com diferentes estratégias de taxa
+- Relatórios estatísticos
+
+## Sistema de Adoção de Animais
 Projeto final da disciplina de POO 
 
 <img width="631" height="546" alt="image" src="https://github.com/user-attachments/assets/b7df48ba-dbad-4248-b1dd-bb643c79a1f5" />
 
-## Pré-requisitos
-Python 3
+
+## Como Usar
+
+### Pré-requisitos
+```bash
+Python 3.10+
 Pytest
-
-## Como rodar
-
-
-Desenvolvido por: Juan Carlos, Juliett Figueirêdo, Leandro Pereira, Linderval Matias
-
-## Type hints
-Anotações de sintaxe para indicar o tipo de dado esperado para variáveis, parâmetros de funções e retornos de funções.
-Exemplos (criado por IA via busca no campo de pesquisa Google):
-
-```
-idade: int = 25
-nome: str = "Maria"
-saldo: float = 1500.75
-is_ativo: bool = True
-
-
-def saudacao(nome: str) -> str:
-    """Retorna uma string de saudação."""
-    return f"Olá, {nome}!"
-
-def somar(a: int, b: int) -> int:
-    """Soma dois números inteiros e retorna o resultado."""
-    return a + b
-
-from typing import List, Dict
-
-nomes: List[str] = ["João", "Ana", "Carlos"]
-configuracoes: Dict[str, str] = {"tema": "escuro", "idioma": "portugues"}
-
 ```
 
-## Docstrings
-
-O docstring é uma string de documentação que deve aparecer dentro do código-fonte da classe, método ou módulo que está sendo documentado. Exemplo estilo google e estilo numpy abaixo criados por Gemini.
-
-### Estilo  Google
-
-```
-class Cachorro(Animal, VacinavelMixin, AdestravelMixin):
-    """Representa um cão no sistema de adoção.
-
-    Herda de Animal e implementa funcionalidades específicas de cães
-    como vacinação e adestramento através de Mixins.
-    Cachorros possuem atributos específicos como a necessidade de passeio. [cite: 37]
-
-    Attributes:
-        necessidade_passeio (str): Nível de necessidade de exercícios/passeio
-            (ex: 'Baixa', 'Média', 'Alta'). [cite: 37]
-        _agenda_vacinas (list): Lista de datas de vacinas pendentes. (Herdado de VacinavelMixin) [cite: 39]
-        _nivel_adestramento (int): Nível de adestramento do cão (0-10). (Herdado de AdestravelMixin) [cite: 40]
-        id (str): Identificador único do animal. [cite: 46]
-        especie (str): Espécie do animal (sempre 'Cachorro'). [cite: 11]
-        status (str): Estado atual do animal (ex: 'DISPONIVEL', 'RESERVADO', 'QUARENTENA'). [cite: 12]
-        # Outros atributos herdados...
-    """
-
-    def __init__(self, raca: str, nome: str, sexo: str, idade_meses: int, porte: str,
-                 temperamento: list, necessidade_passeio: str):
-        """Inicializa uma nova instância de Cachorro.
-
-        Args:
-            raca (str): Raça específica do cão. [cite: 11]
-            nome (str): Nome do cão. [cite: 11]
-            sexo (str): Sexo do cão. [cite: 11]
-            idade_meses (int): Idade do cão em meses (≥ 0). [cite: 11, 43]
-            porte (str): Porte do cão ('P', 'M', 'G'). [cite: 11, 43]
-            temperamento (list): Lista de características de temperamento. [cite: 11]
-            necessidade_passeio (str): Nível de necessidade de passeio. [cite: 37]
-        
-        Raises:
-            ValueError: Se a idade for negativa ou o porte for inválido. [cite: 43]
-        """
-        # ... implementação
-
-    def vacinar(self, vacina: str):
-        """Registra a aplicação de uma vacina e atualiza o histórico.
-
-        Args:
-            vacina (str): O nome da vacina aplicada. [cite: 39]
-
-        Returns:
-            bool: True se a vacina foi registrada com sucesso.
-        """
-        # ... implementação
-
-    def treinar(self, ganho_nivel: int = 1):
-        """Aumenta o nível de adestramento do cão.
-
-        Args:
-            ganho_nivel (int): Quantidade de níveis para aumentar. Padrão é 1. [cite: 40]
-        """
-        # ... implementação
+### Instalação
+```bash
+git clone [https://github.com/juliettfigueiredodev/Sistema-de-Adocao-de-Animais.git]
+cd sistema-adocao-animais
+pip install pytest
 ```
 
-### Estilo Numpy
+### Tecnologias Utilizadas
 
-```
-class Cachorro(Animal, VacinavelMixin, AdestravelMixin):
-    """Representa um cão no sistema de adoção.
+- [Python 3.x](https://www.python.org/) — linguagem utilizada no backend da aplicação.
+- [Git](https://git-scm.com/) — controle de versão do código-fonte.
+- [GitHub](https://github.com/) — hospedagem do repositório e colaboração entre os membros do time.
+- [VS Code](https://code.visualstudio.com/) — editor de código utilizado no desenvolvimento.
+- [Pytest](https://docs.pytest.org/en/stable/) — framework utilizado para a criação e execução de testes automatizados, garantindo a qualidade e o correto funcionamento da aplicação.
 
-    Hereda de Animal e implementa funcionalidades específicas de cães
-    como vacinação e adestramento através de Mixins.
-    Cachorros possuem atributos específicos como a necessidade de passeio. [cite: 37]
+##  Conceitos de POO
 
-    Attributes
-    ----------
-    necessidade_passeio : str
-        Nível de necessidade de exercícios/passeio (ex: 'Baixa', 'Média', 'Alta'). [cite: 37]
-    _agenda_vacinas : list
-        Lista de datas de vacinas pendentes. (Herdado de VacinavelMixin) [cite: 39]
-    _nivel_adestramento : int
-        Nível de adestramento do cão (0-10). (Herdado de AdestravelMixin) [cite: 40]
-    id : str
-        Identificador único do animal. [cite: 46]
-    especie : str
-        Espécie do animal (sempre 'Cachorro'). [cite: 11]
-    status : str
-        Estado atual do animal (ex: 'DISPONIVEL', 'RESERVADO', 'QUARENTENA'). [cite: 12]
-    # Outros atributos herdados...
-    """
+- **Herança:** Animal → Cachorro/Gato, Pessoa → Adotante
+- **Encapsulamento:** @property com validações
+- **Polimorfismo:** Estratégias de taxa intercambiáveis
+- **Abstração:** Classes abstratas (Animal, TaxaAdocaoStrategy)
+- **Métodos especiais:** `__str__`, `__repr__`, `__eq__`, `__hash__`, `__lt__`, `__iter__`
 
-    def __init__(self, raca: str, nome: str, sexo: str, idade_meses: int, porte: str,
-                 temperamento: list, necessidade_passeio: str):
-        """Inicializa uma nova instância de Cachorro.
+---
 
-        Parameters
-        ----------
-        raca : str
-            Raça específica do cão. [cite: 11]
-        nome : str
-            Nome do cão. [cite: 11]
-        sexo : str
-            Sexo do cão. [cite: 11]
-        idade_meses : int
-            Idade do cão em meses (≥ 0). [cite: 11, 43]
-        porte : str
-            Porte do cão ('P', 'M', 'G'). [cite: 11, 43]
-        temperamento : list
-            Lista de características de temperamento. [cite: 11]
-        necessidade_passeio : str
-            Nível de necessidade de passeio. [cite: 37]
-        
-        Raises
-        ------
-        ValueError
-            Se a idade for negativa ou o porte for inválido. [cite: 43]
-        """
-        # ... implementação
+##  Documentação
 
-    def vacinar(self, vacina: str) -> bool:
-        """Registra a aplicação de uma vacina e atualiza o histórico.
+O projeto utiliza:
+- **Type hints** em todo o código
+- **Docstrings** no padrão Google
+- **Exceções customizadas** para tratamento de erros
 
-        Parameters
-        ----------
-        vacina : str
-            O nome da vacina aplicada. [cite: 39]
+## Etiquetas
 
-        Returns
-        -------
-        bool
-            True se a vacina foi registrada com sucesso.
-        """
-        # ... implementação
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+## Autores
 
-    def treinar(self, ganho_nivel: int = 1):
-        """Aumenta o nível de adestramento do cão.
+- [@Juliett Figueirêdo](https://github.com/juliettfigueiredodev)
+- [@Juan Carlos](https://github.com/JuanCostaDev)
+- [@Linderval Matias](https://github.com/Linderval-Moura)
+- [@Leandro Pereira](https://github.com/leandropereira-alt)
 
-        Parameters
-        ----------
-        ganho_nivel : int, optional
-            Quantidade de níveis para aumentar. Padrão é 1. [cite: 40]
-        """
-        # ... implementação
-```
+
+
 

@@ -1,9 +1,21 @@
 {
-  "idade_minima": 18,
-  "area_minima_porte_g": 60,
-  "pesos_compatibilidade": {
-    "porte_moradia": 30,
-    "experiencia": 25,
-    "criancas": 20
+  "politicas": {
+    "idade_minima": 18,
+    "area_minima_porte_g": 60,
+    "moradia_permitida_porte_g": "casa"
+  },
+
+  "reserva": {
+    "duracao_horas": 48
+  },
+
+  "compatibilidade": {
+    "pesos": {
+      "porte_moradia": 0.30,
+      "experiencia": 0.25,
+      "criancas": 0.20,
+      "temperamento": 0.15,
+      "outros_animais": 0.10
+    }
   }
 }
