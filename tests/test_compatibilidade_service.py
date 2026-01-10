@@ -14,18 +14,6 @@ from src.services.compatibilidade_service import CompatibilidadeService
 
 class TestCompatibilidadeService:
 
-    settings_mock = {
-            "compatibilidade": {
-                "pesos": {
-                    "porte_moradia": 0.30,
-                    "experiencia": 0.25,
-                    "criancas": 0.20,
-                    "outros_animais": 0.10,
-                    "temperamento": 0.15
-                }
-            }
-        }
-
     def test_score_100_adotante_ideal(self):
         '''
         Docstring for test_score_100_adotante_ideal
@@ -35,7 +23,7 @@ class TestCompatibilidadeService:
         
         '''
         compatibilidade = CompatibilidadeService()
-        compatibilidade.settings = self.settings_mock
+        
 
         adotante1 = Adotante(
             nome='Juliett',
@@ -69,7 +57,6 @@ class TestCompatibilidadeService:
         '''
         compatibilidade = CompatibilidadeService()
 
-        compatibilidade.settings = self.settings_mock
 
         adotante2 = Adotante(
             nome='Alice',
@@ -105,7 +92,7 @@ class TestCompatibilidadeService:
 
         compatibilidade = CompatibilidadeService()
 
-        compatibilidade.settings = self.settings_mock
+        
 
         adotante3 = Adotante(
             nome='Clara',
