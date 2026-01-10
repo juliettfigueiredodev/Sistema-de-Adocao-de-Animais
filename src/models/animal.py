@@ -1,3 +1,7 @@
+"""
+Módulo base para representação de animais no sistema de adoção.
+"""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -6,26 +10,60 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Iterator, List, Optional
 from uuid import uuid4
 
-from models.animal_status import AnimalStatus, validar_transicao
+from src.models.animal_status import AnimalStatus, validar_transicao
 
 
 class ValorInvalidoError(ValueError):
+    """
+    Exceção lançada quando um valor de atributo do animal é inválido.
+    
+    Exemplos: porte inválido, idade negativa, temperamento mal formatado.
+    """
     pass
 
-#congela o valor
+
 @dataclass(frozen=True)
 class AnimalEvent:
+    """
+    Evento imutável no histórico do animal.
+    
+    Attributes:
+        tipo: Tipo do evento (ENTRADA, MUDANCA_STATUS, VACINA, etc).
+        detalhes: Descrição detalhada do evento.
+        timestamp: Data/hora em formato ISO8601.
+    """
     tipo: str
     detalhes: str
     timestamp: str  # ISO8601
 
     @staticmethod
     def novo(tipo: str, detalhes: str) -> "AnimalEvent":
+        """Cria um novo evento com timestamp atual."""
         ts = datetime.now(timezone.utc).isoformat()
         return AnimalEvent(tipo=tipo, detalhes=detalhes, timestamp=ts)
 
 
 class Animal(ABC):
+    """
+    Classe abstrata base para representação de animais.
+    
+    Define a interface comum para todos os animais do sistema,
+    incluindo atributos obrigatórios, validações, histórico de eventos
+    e regras de transição de status.
+    
+    Attributes:
+        id: Identificador único do animal (UUID).
+        data_entrada: Data/hora de entrada no sistema (ISO8601).
+        especie: Espécie do animal (Cachorro, Gato, etc).
+        raca: Raça do animal.
+        nome: Nome do animal.
+        sexo: Sexo do animal.
+        idade_meses: Idade em meses.
+        porte: Porte físico (P, M ou G).
+        temperamento: Lista de características comportamentais.
+        status: Status atual (DISPONIVEL, RESERVADO, etc).
+    """
+    
     PORTES_VALIDOS = {"P", "M", "G"}
 
     def __init__(
@@ -103,20 +141,24 @@ class Animal(ABC):
     @property
     @abstractmethod
     def especie_padrao(self) -> str:
+        """Retorna a espécie padrão da classe concreta (Cachorro, Gato, etc)."""
         raise NotImplementedError
 
     # Propriedades
     
     @property
     def id(self) -> str:
+        """Identificador único do animal."""
         return self._id
 
     @property
     def data_entrada(self) -> str:
+        """Data/hora de entrada no sistema (ISO8601)."""
         return self._data_entrada
  
     @property
     def reservado_por(self) -> Optional[str]:
+        """ID do adotante que reservou o animal (se houver)."""
         return self._reservado_por
 
     @reservado_por.setter
@@ -125,6 +167,7 @@ class Animal(ABC):
 
     @property
     def reserva_ate(self) -> Optional[str]:
+        """Data/hora limite da reserva (ISO8601)."""
         return self._reserva_ate
 
     @reserva_ate.setter
@@ -133,6 +176,7 @@ class Animal(ABC):
 
     @property
     def especie(self) -> str:
+        """Espécie do animal."""
         return self._especie
 
     @especie.setter
@@ -144,6 +188,7 @@ class Animal(ABC):
 
     @property
     def raca(self) -> str:
+        """Raça do animal."""
         return self._raca
 
     @raca.setter
@@ -155,6 +200,7 @@ class Animal(ABC):
 
     @property
     def nome(self) -> str:
+        """Nome do animal."""
         return self._nome
 
     @nome.setter
@@ -166,6 +212,7 @@ class Animal(ABC):
 
     @property
     def sexo(self) -> str:
+        """Sexo do animal."""
         return self._sexo
 
     @sexo.setter
@@ -177,6 +224,7 @@ class Animal(ABC):
 
     @property
     def idade_meses(self) -> int:
+        """Idade do animal em meses."""
         return self._idade_meses
 
     @idade_meses.setter
@@ -189,6 +237,7 @@ class Animal(ABC):
 
     @property
     def porte(self) -> str:
+        """Porte físico do animal (P, M ou G)."""
         return self._porte
 
     @porte.setter
@@ -200,6 +249,7 @@ class Animal(ABC):
 
     @property
     def temperamento(self) -> List[str]:
+        """Lista de características comportamentais do animal."""
         return list(self._temperamento)
 
     @temperamento.setter
@@ -224,11 +274,22 @@ class Animal(ABC):
 
     @property
     def status(self) -> AnimalStatus:
+        """Status atual do animal no sistema."""
         return self._status
 
     # Regras de domínio
     
     def mudar_status(self, novo_status: AnimalStatus, motivo: str = "") -> None:
+        """
+        Muda o status do animal validando a transição.
+        
+        Args:
+            novo_status: Novo status desejado.
+            motivo: Motivo da mudança (opcional).
+        
+        Raises:
+            TransicaoDeEstadoInvalidaError: Se a transição for inválida.
+        """
         validar_transicao(self._status, novo_status)
         anterior = self._status
         self._status = novo_status
@@ -238,15 +299,28 @@ class Animal(ABC):
         self._registrar_evento("MUDANCA_STATUS", detalhe)
 
     def registrar_evento(self, tipo: str, detalhes: str) -> None:
-        """API pública para registrar fatos relevantes (vacina, triagem, etc.)."""
+        """
+        API pública para registrar fatos relevantes.
+        
+        Args:
+            tipo: Tipo do evento (VACINA, TRIAGEM, etc).
+            detalhes: Descrição detalhada do evento.
+        """
         self._registrar_evento(tipo, detalhes)
 
     def _registrar_evento(self, tipo: str, detalhes: str) -> None:
+        """Método interno para adicionar eventos ao histórico."""
         self._historico.append(AnimalEvent.novo(tipo=tipo, detalhes=detalhes))
 
     # Persistência (JSON)
 
     def to_dict(self) -> Dict[str, Any]:
+        """
+        Serializa o animal para dicionário.
+        
+        Returns:
+            Dicionário com todos os atributos do animal.
+        """
         return {
             "id": self.id,
             "data_entrada": self.data_entrada,

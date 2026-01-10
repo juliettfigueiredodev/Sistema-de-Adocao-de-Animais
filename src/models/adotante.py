@@ -2,7 +2,7 @@
 Módulo contendo a classe Adotante.
 """
 
-from typing import Literal
+from typing import Any, Dict, Literal
 from src.models.pessoa import Pessoa
 
 
@@ -124,3 +124,32 @@ class Adotante(Pessoa):
             f"experiencia={self.experiencia}, criancas={self.criancas}, "
             f"outros_animais={self.outros_animais})"
         )
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Serializa o adotante para dicionário (útil para JSON/persistência).
+        
+        Returns:
+            Dicionário com todos os atributos do adotante.
+        
+        Example:
+            >>> adotante.to_dict()
+            {
+                'nome': 'Maria Santos',
+                'idade': 28,
+                'moradia': 'casa',
+                'area_util': 80,
+                'experiencia': True,
+                'criancas': False,
+                'outros_animais': True
+            }
+        """
+        return {
+            "nome": self.nome,
+            "idade": self.idade,
+            "moradia": self.moradia,
+            "area_util": self.area_util,
+            "experiencia": self.experiencia,
+            "criancas": self.criancas,
+            "outros_animais": self.outros_animais
+        }
