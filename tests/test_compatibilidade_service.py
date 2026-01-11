@@ -117,3 +117,34 @@ class TestCompatibilidadeService:
         score = compatibilidade.calcular(adotante3, animal3)
         
         assert score < 90
+
+    def test_penalidade_com_outros_animais(self):
+        '''
+        Cenário: Adotante tem outros animais, mas o cachorro NÃO é sociável.
+        Deve perder pontos no critério de outros animais.
+        '''
+        compatibilidade = CompatibilidadeService()
+
+        adotante = Adotante(
+            nome='Marcos',
+            idade=30,
+            moradia='casa',
+            area_util=100,
+            experiencia=True,
+            criancas=False,
+            outros_animais=True # Tem animais
+        )
+
+        animal = Cachorro(
+            nome='Rex',
+            porte='M',
+            temperamento=['ciumento'], # NÃO é sociável
+            raca='SRD',
+            sexo='M',
+            idade_meses=24,
+            necessidade_passeio=5
+        )
+
+        score = compatibilidade.calcular(adotante, animal)
+        
+        assert score < 100
