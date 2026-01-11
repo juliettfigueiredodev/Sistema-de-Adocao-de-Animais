@@ -50,7 +50,7 @@ pytest tests/ -v
 # Teste específico
 pytest tests/test_politica_triagem.py -v
 ```
-
+ 
 ---
 
 ##  Estrutura do Projeto
@@ -145,15 +145,6 @@ O arquivo `settings.json` contém as políticas do sistema:
 - [GitHub](https://github.com/) — hospedagem do repositório e colaboração
 - [VS Code](https://code.visualstudio.com/) — editor de código
 - [Pytest](https://docs.pytest.org/) — framework de testes automatizados
-
----
-
-##  Documentação
-
-O projeto utiliza:
-- **Type hints** em todo o código
-- **Docstrings** no padrão Google
-- **Exceções customizadas** para tratamento de erros
 
 ---
 
