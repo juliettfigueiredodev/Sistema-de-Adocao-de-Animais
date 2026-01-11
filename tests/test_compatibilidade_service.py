@@ -1,9 +1,3 @@
-
-'''
-
-        expiração da reserva
-
-'''
 import pytest
 from src.infrastructure.settings_loader import SettingsLoader
 from src.models.adotante import Adotante
