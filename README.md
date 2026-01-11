@@ -2,7 +2,9 @@
 
 Projeto final da disciplina de POO — UFCA
 
-![Diagrama do Sistema](https://github.com/user-attachments/assets/b7df48ba-dbad-4248-b1dd-bb643c79a1f5)
+<img width="539" height="538" alt="image" src="https://github.com/user-attachments/assets/b9ada86c-9275-4682-9d8e-662e3c4c017c" />
+
+
 
 ---
 
