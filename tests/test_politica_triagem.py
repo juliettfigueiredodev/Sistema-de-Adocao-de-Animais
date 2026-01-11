@@ -1,8 +1,6 @@
 import pytest
 from src.infrastructure.settings_loader import SettingsLoader
 from src.models.adotante import Adotante
-from src.models.cachorro import Cachorro
-from src.models.gato import Gato
 from src.validators.politica_triagem import PoliticaTriagem
 from src.validators.exceptions import PoliticaNaoAtendidaError
 
