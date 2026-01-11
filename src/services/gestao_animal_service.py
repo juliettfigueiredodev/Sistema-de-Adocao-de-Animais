@@ -1,12 +1,45 @@
-from datetime import datetime
+"""
+Serviço de gestão do ciclo de vida dos animais.
+"""
+
+from src.models.animal import Animal
 from src.models.animal_status import AnimalStatus
+from src.models.fila_espera import FilaEspera
 from src.validators.exceptions import TransicaoDeEstadoInvalidaError, FilaVaziaError
 
 class GestaoAnimalService:
+    """
+    Gerencia transições de estado complexas e regras de negócio pós-adoção.
     
-    def processar_devolucao(self, animal, motivo: str, problema_saude_comportamento: bool):
+    Responsável por processar devoluções, gerenciar quarentena
+    e verificar expiração de reservas, garantindo a integridade
+    das transições de estado do animal.
+    
+    Example:
+        >>> service = GestaoAnimalService()
+        >>> try:
+        ...     service.processar_devolucao(animal, "Motivo pessoal", False)
+        ... except TransicaoDeEstadoInvalidaError as e:
+        ...     print(f"Erro: {e}")
+    """
+
+    def processar_devolucao(self, animal: Animal, motivo: str, problema_saude_comportamento: bool) -> None:
         """
-        Devolução registra motivo e ajusta status para DEVOLVIDO ou QUARENTENA.
+        Processa a devolução de um animal adotado.
+        
+        Realiza a transição de status obrigatória para DEVOLVIDO e, 
+        caso haja problemas de saúde ou comportamento, move 
+        automaticamente para QUARENTENA.
+        
+        Args:
+            animal: O animal sendo devolvido.
+            motivo: A razão informada para a devolução.
+            problema_saude_comportamento: Flag indicando se há problemas que
+                exijam isolamento (quarentena).
+        
+        Raises:
+            TransicaoDeEstadoInvalidaError: Se o animal não estiver com status ADOTADO.
+            Exception: Para erros críticos durante a mudança de status.
         """
         if animal.status != AnimalStatus.ADOTADO:
             raise TransicaoDeEstadoInvalidaError(f"Não é possível devolver um animal com status {animal.status}")
@@ -15,26 +48,42 @@ class GestaoAnimalService:
         print(f"Motivo registrado: {motivo}")
 
         # Lógica de decisão de status
-        if problema_saude_comportamento:
-            animal.status = AnimalStatus.QUARENTENA
-            print(f"ALERTA: Animal movido para {animal.status.value} devido a problemas de saúde/comportamento.")
-        else:
-            animal.status = AnimalStatus.DEVOLVIDO
-            print(f"Animal movido para status: {animal.status.value}.")
-        
-        # Registrar no histórico (conforme requisito [cite: 13])
-        evento = {
-            "data": datetime.now(),
-            "evento": "DEVOLUCAO",
-            "motivo": motivo,
-            "novo_status": animal.status.value
-        }
-        animal.historico.append(evento)
+        try:
+            # Todo animal devolvido vira 'DEVOLVIDO' primeiro
+            # Isso satisfaz a regra estrita de transição (ADOTADO -> DEVOLVIDO)
+            animal.mudar_status(AnimalStatus.DEVOLVIDO, motivo)
+            print(f"Status inicial ajustado para: {AnimalStatus.DEVOLVIDO.value}")
+
+            # Se tiver problema, move de DEVOLVIDO para QUARENTENA
+            if problema_saude_comportamento:
+                print("Detectado problema de saúde/comportamento. Movendo para Quarentena...")
+                animal.mudar_status(
+                    AnimalStatus.QUARENTENA, 
+                    "Encaminhado automaticamente pós-devolução devido a problemas de saúde/comportamento"
+                )
+                print(f"ALERTA: Animal movido para {animal.status.value}.")
+            
+            # Se não tiver problema, simplesmente permanece como DEVOLVIDO
+
+        except Exception as e:
+            print(f"Erro crítico ao mudar status: {e}")
+            raise e
 
 
-    def reavaliar_quarentena(self, animal, apto_adocao: bool):
+    def reavaliar_quarentena(self, animal: Animal, apto_adocao: bool) -> None:
         """
-        Reavaliação pode migrar status para DISPONIVEL ou INADOTAVEL.
+        Reavalia um animal que está em quarentena ou devolvido.
+        
+        Dependendo da avaliação clínica/comportamental, define se o
+        animal volta a estar disponível ou se torna inadotável.
+        
+        Args:
+            animal: O animal a ser reavaliado.
+            apto_adocao: True se o animal estiver saudável e apto, False caso contrário.
+            
+        Raises:
+            TransicaoDeEstadoInvalidaError: Se o animal não estiver em 
+                QUARENTENA ou DEVOLVIDO.
         """
         status_permitidos = [AnimalStatus.QUARENTENA, AnimalStatus.DEVOLVIDO]
         
@@ -44,28 +93,28 @@ class GestaoAnimalService:
         print(f"--- Reavaliando {animal.nome} ---")
         
         if apto_adocao:
-            animal.status = AnimalStatus.DISPONIVEL
+            novo_status = AnimalStatus.DISPONIVEL
             resultado = "Aprovado"
         else:
-            animal.status = AnimalStatus.INADOTAVEL
+            novo_status = AnimalStatus.INADOTAVEL
             resultado = "Reprovado"
 
-        print(f"Resultado da reavaliação: {resultado}. Novo status: {animal.status.value}")
+        animal.mudar_status(novo_status, f"Reavaliação: {resultado}")
 
-        evento = {
-            "data": datetime.now(),
-            "evento": "REAVALIACAO",
-            "resultado": resultado,
-            "novo_status": animal.status.value
-        }
-        animal.historico.append(evento)
+        print(f"Resultado da reavaliação: {resultado}. Novo status: {novo_status.value}")
 
 
-    def verificar_expiracao_reserva(self, animal, fila_espera):
+    def verificar_expiracao_reserva(self, animal: Animal, fila_espera: FilaEspera) -> None:
         """
-        Ao expirar reserva, notificar próximo da fila.
+        Verifica a expiração de reserva e gerencia a fila de espera.
+        
+        Se a reserva expirou, notifica o próximo adotante da fila (se houver)
+        ou devolve o animal para o status DISPONIVEL.
+        
+        Args:
+            animal: O animal cuja reserva está sendo verificada.
+            fila_espera: A fila de espera associada a este animal (ou global).
         """
-        # Simulação: assumimos que a verificação de tempo já ocorreu e a reserva expirou
         if animal.status != AnimalStatus.RESERVADO:
             print("Este animal não está reservado.")
             return
@@ -82,12 +131,5 @@ class GestaoAnimalService:
             
         except FilaVaziaError:
             # Se não tem ninguém na fila, volta a ficar disponível geral
-            animal.status = AnimalStatus.DISPONIVEL
+            animal.mudar_status(AnimalStatus.DISPONIVEL, "Expiração de reserva sem fila")
             print(f"Ninguém na fila de espera. {animal.nome} voltou para status DISPONIVEL.")
-
-        evento = {
-            "data": datetime.now(),
-            "evento": "EXPIRACAO_RESERVA",
-            "novo_status": animal.status.value
-        }
-        animal.historico.append(evento)
