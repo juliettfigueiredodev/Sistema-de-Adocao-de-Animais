@@ -1,9 +1,3 @@
-
-'''
-
-cobrir regras críticas (políticas, expiração da reserva, cálculo de compatibilidade, transições de estado, estratégias de taxa).
-
-'''
 import pytest
 from src.infrastructure.settings_loader import SettingsLoader
 from src.models.adotante import Adotante
@@ -48,7 +42,7 @@ class TestCompatibilidadeService:
         score = compatibilidade.calcular(adotante1, animal1)
 
         assert score == 100
-
+        
     def test_penalidade_animal_G_apartamento(self):
         '''
         Docstring for test_penalidade_animal_G_apartamento
