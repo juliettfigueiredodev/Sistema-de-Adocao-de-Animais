@@ -180,31 +180,38 @@ class AdocaoService:
             "ambiente seguro."
         )
 
-        contrato = (
-            "=" * 60 + "\n"
-            "CONTRATO DE ADOÇÃO\n"
-            "=" * 60 + "\n"
-            f"Data: {agora}\n\n"
-            "DADOS DO ADOTANTE:\n"
-            f"  Nome: {adotante_nome}\n\n"
-            "DADOS DO ANIMAL:\n"
-            f"  Nome: {animal.nome}\n"
-            f"  Espécie: {animal.especie}\n"
-            f"  Raça: {animal.raca}\n"
-            f"  Sexo: {animal.sexo}\n"
-            f"  Idade: {animal.idade_meses} meses\n"
-            f"  Porte: {animal.porte}\n"
-            f"  ID: {animal.id}\n\n"
-            "VALORES:\n"
-            f"  Taxa de Adoção: R$ {taxa:.2f}\n"
-            f"  Tipo de Taxa: {strategy.nome()}\n\n"
-            "TERMOS E CONDIÇÕES:\n"
-            f"  {termos_final}\n\n"
-            "=" * 60 + "\n"
-            "Assinatura do Adotante: _______________________\n"
-            "Data: ___/___/______\n"
-            "=" * 60 + "\n"
-        )
+        # Monta contrato usando lista de linhas (evita bug de concatenação)
+        linhas = []
+        linhas.append("=" * 60)
+        linhas.append("CONTRATO DE ADOÇÃO")
+        linhas.append("=" * 60)
+        linhas.append(f"Data: {agora}")
+        linhas.append("")
+        linhas.append("DADOS DO ADOTANTE:")
+        linhas.append(f"  Nome: {adotante_nome}")
+        linhas.append("")
+        linhas.append("DADOS DO ANIMAL:")
+        linhas.append(f"  Nome: {animal.nome}")
+        linhas.append(f"  Espécie: {animal.especie}")
+        linhas.append(f"  Raça: {animal.raca}")
+        linhas.append(f"  Sexo: {animal.sexo}")
+        linhas.append(f"  Idade: {animal.idade_meses} meses")
+        linhas.append(f"  Porte: {animal.porte}")
+        linhas.append(f"  ID: {animal.id}")
+        linhas.append("")
+        linhas.append("VALORES:")
+        linhas.append(f"  Taxa de Adoção: R$ {taxa:.2f}")
+        linhas.append(f"  Tipo de Taxa: {strategy.nome()}")
+        linhas.append("")
+        linhas.append("TERMOS E CONDIÇÕES:")
+        linhas.append(f"  {termos_final}")
+        linhas.append("")
+        linhas.append("=" * 60)
+        linhas.append("Assinatura do Adotante: _______________________")
+        linhas.append("Data: ___/___/______")
+        linhas.append("=" * 60)
+        
+        contrato = "\n".join(linhas) + "\n"
 
         # Salva contrato em arquivo
         self._salvar_contrato_em_arquivo(
@@ -248,7 +255,9 @@ class AdocaoService:
             f"contrato_{animal_safe}_{adotante_safe}_{data_safe}.txt"
         )
         
+        # Salva o arquivo
         arquivo.write_text(contrato, encoding="utf-8")
+        
         return arquivo
 
     @staticmethod

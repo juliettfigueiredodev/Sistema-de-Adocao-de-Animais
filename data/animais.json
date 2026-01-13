@@ -1,57 +1,51 @@
 [
   {
-    "id": "7a4b1255-163e-418d-b777-52234f59c6d5",
-    "data_entrada": "2026-01-11T19:57:32.537138+00:00",
+    "id": "27652bea-1fb1-4956-9d7a-6c1b00ef0401",
+    "data_entrada": "2026-01-13T02:29:09.886348+00:00",
     "especie": "Cachorro",
-    "raca": "Labrador",
-    "nome": "Amora",
-    "sexo": "F",
+    "raca": "labrador",
+    "nome": "rex",
+    "sexo": "M",
     "idade_meses": 24,
     "porte": "G",
     "temperamento": [
       "docil",
       "calmo"
     ],
-    "status": "RESERVADO",
-    "reservado_por": "Clarice",
-    "reserva_ate": "2026-01-13T19:57:32.544208+00:00",
+    "status": "DISPONIVEL",
+    "reservado_por": null,
+    "reserva_ate": null,
     "historico": [
       {
         "tipo": "ENTRADA",
         "detalhes": "Animal cadastrado com status DISPONIVEL",
-        "timestamp": "2026-01-11T19:57:32.537175+00:00"
-      },
-      {
-        "tipo": "MUDANCA_STATUS",
-        "detalhes": "DISPONIVEL -> RESERVADO | motivo: Reservado por Juliett",
-        "timestamp": "2026-01-11T19:57:32.538446+00:00"
-      },
-      {
-        "tipo": "RESERVA",
-        "detalhes": "Reservado por Juliett até 2026-01-13T19:57:32.538411+00:00",
-        "timestamp": "2026-01-11T19:57:32.538485+00:00"
-      },
-      {
-        "tipo": "MUDANCA_STATUS",
-        "detalhes": "RESERVADO -> DISPONIVEL | motivo: Reserva expirada (liberado automaticamente ao reservar)",
-        "timestamp": "2026-01-11T19:57:32.542917+00:00"
-      },
-      {
-        "tipo": "RESERVA_EXPIRADA",
-        "detalhes": "Reserva expirada foi liberada automaticamente",
-        "timestamp": "2026-01-11T19:57:32.542947+00:00"
-      },
-      {
-        "tipo": "MUDANCA_STATUS",
-        "detalhes": "DISPONIVEL -> RESERVADO | motivo: Reservado por Clarice",
-        "timestamp": "2026-01-11T19:57:32.544240+00:00"
-      },
-      {
-        "tipo": "RESERVA",
-        "detalhes": "Reservado por Clarice até 2026-01-13T19:57:32.544208+00:00",
-        "timestamp": "2026-01-11T19:57:32.544280+00:00"
+        "timestamp": "2026-01-13T02:42:18.583388+00:00"
       }
     ],
     "necessidade_passeio": 8
+  },
+  {
+    "id": "b7faf92f-0e6a-429e-a538-78bb352a9438",
+    "data_entrada": "2026-01-13T02:29:29.013839+00:00",
+    "especie": "Cachorro",
+    "raca": "Poodle",
+    "nome": "luna",
+    "sexo": "F",
+    "idade_meses": 120,
+    "porte": "P",
+    "temperamento": [
+      "calmo"
+    ],
+    "status": "RESERVADO",
+    "reservado_por": "joao silva",
+    "reserva_ate": "2026-01-15T02:35:10.007265+00:00",
+    "historico": [
+      {
+        "tipo": "ENTRADA",
+        "detalhes": "Animal cadastrado com status RESERVADO",
+        "timestamp": "2026-01-13T02:42:18.583512+00:00"
+      }
+    ],
+    "necessidade_passeio": 3
   }
 ]

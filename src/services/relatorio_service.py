@@ -276,9 +276,11 @@ class RelatorioService:
             # Procura eventos de devolução no histórico
             for evento in animal:
                 if evento.tipo in ("DEVOLUCAO", "MUDANCA_STATUS"):
-                    # Para MUDANCA_STATUS, verifica se mudou para DEVOLVIDO
+                    # Para MUDANCA_STATUS, verifica se mudou PARA DEVOLVIDO (não DE)
                     if evento.tipo == "MUDANCA_STATUS":
-                        if "DEVOLVIDO" not in evento.detalhes:
+                        # Só conta se for transição -> DEVOLVIDO
+                        # Ex: "ADOTADO -> DEVOLVIDO | motivo: alergia"
+                        if "-> DEVOLVIDO" not in evento.detalhes:
                             continue
                     
                     # Tenta extrair motivo do campo detalhes
@@ -316,7 +318,3 @@ class RelatorioService:
         
         # Se não encontrou padrão, retorna detalhes completos
         return detalhes.strip() if detalhes.strip() else None
-
-    def __repr__(self) -> str:
-        """Representação técnica do serviço."""
-        return f"RelatorioService(triagem={self.triagem!r})"

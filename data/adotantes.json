@@ -1,0 +1,20 @@
+{
+  "joao silva": {
+    "nome": "joao silva",
+    "idade": 35,
+    "moradia": "casa",
+    "area_util": 120,
+    "experiencia": true,
+    "criancas": false,
+    "outros_animais": false
+  },
+  "maria santos": {
+    "nome": "maria santos",
+    "idade": 28,
+    "moradia": "apartamento",
+    "area_util": 45,
+    "experiencia": false,
+    "criancas": false,
+    "outros_animais": false
+  }
+}

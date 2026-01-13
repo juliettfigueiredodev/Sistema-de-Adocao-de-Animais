@@ -1,0 +1,17 @@
+{
+  "27652bea-1fb1-4956-9d7a-6c1b00ef0401": [
+    {
+      "adotante": {
+        "nome": "maria santos",
+        "idade": 28,
+        "moradia": "apartamento",
+        "area_util": 45,
+        "experiencia": false,
+        "criancas": false,
+        "outros_animais": false
+      },
+      "score": 75,
+      "timestamp": 1768272153.5820062
+    }
+  ]
+}

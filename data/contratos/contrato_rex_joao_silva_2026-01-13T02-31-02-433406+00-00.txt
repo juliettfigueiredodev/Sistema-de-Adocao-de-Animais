@@ -1,0 +1,28 @@
+============================================================
+CONTRATO DE ADOÇÃO
+============================================================
+Data: 2026-01-13T02:31:02.433406+00:00
+
+DADOS DO ADOTANTE:
+  Nome: joao silva
+
+DADOS DO ANIMAL:
+  Nome: rex
+  Espécie: Cachorro
+  Raça: labrador
+  Sexo: M
+  Idade: 24 meses
+  Porte: G
+  ID: 27652bea-1fb1-4956-9d7a-6c1b00ef0401
+
+VALORES:
+  Taxa de Adoção: R$ 100.00
+  Tipo de Taxa: Padrão
+
+TERMOS E CONDIÇÕES:
+  O adotante se compromete a zelar pelo bem-estar do animal, fornecendo alimentação adequada, cuidados veterinários e ambiente seguro.
+
+============================================================
+Assinatura do Adotante: _______________________
+Data: ___/___/______
+============================================================

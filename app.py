@@ -11,6 +11,8 @@ from src.infrastructure.animal_repository import (
     AnimalRepository,
     AnimalNaoEncontradoError,
 )
+from src.infrastructure.adotante_repository import AdotanteRepository
+from src.infrastructure.fila_repository import FilaRepository
 from src.infrastructure.settings_loader import SettingsLoader
 from src.models.adotante import Adotante
 from src.models.animal import Animal
@@ -43,23 +45,34 @@ from src.validators.exceptions import (
 # CONSTANTES
 # ============================================================================
 
-MENU = '''
-        🐾🐾 Adote um Pet! 🐾🐾
+MENU = """
+╔════════════════════════════════════════════════════════════╗
+║              🐾🐾 ADOTE UM PET! 🐾🐾                      ║
+╚════════════════════════════════════════════════════════════╝
+
+📝 CADASTROS
     [1] Cadastrar pet 🐶
-    [2] Cadastrar adotante👤
-    [3] Reservar 🤩
-    [4] Adoção efetiva 😁
-    [5] Devolução (Gera Quarentena/Devolvido) 😿
-        📋📋 Relatórios 📋📋
-    [6] TOP 5 🔥
-    [7] Taxa de adoção espécie/porte
-    [8] Tempo médio entre entrada e adoção
-    [9] Adoções canceladas/devoluções por motivo
-    [10] Reavaliar Animal (Sair da Quarentena) 🩺
-    [11] Simular Expiração de Reserva (Acionar Fila) ⏳
-    [12] Ver Fila de Espera Atual 👀
-    [S] Sair do sistema 🚶🏻
-    O que você quer fazer? => '''
+    [2] Cadastrar adotante 👤
+
+🏠 ADOÇÕES
+    [3] Reservar animal 🤩
+    [4] Efetivar adoção 😁
+    [5] Processar devolução 😿
+
+📊 RELATÓRIOS
+    [6] TOP 5 animais mais adotáveis 🔥
+    [7] Taxa de adoção por espécie/porte 📈
+    [8] Tempo médio até adoção ⏱️
+    [9] Devoluções por motivo 📉
+
+🔧 GESTÃO
+    [10] Reavaliar animal (sair da quarentena) 🩺
+    [11] Simular expiração de reservas ⏳
+    [12] Ver filas de espera 👀
+
+    [S] Sair do sistema 🚪
+
+╰─➤ Digite sua opção: """
 
 
 # ============================================================================
@@ -76,10 +89,10 @@ class SistemaAdocao:
     - Coordenar operações entre diferentes serviços
     
     Attributes:
-        repo: Repositório de animais
+        animal_repo: Repositório de animais
+        adotante_repo: Repositório de adotantes
+        fila_repo: Repositório de filas de espera
         settings: Configurações do sistema
-        adotantes: Lista de adotantes cadastrados (em memória)
-        filas_espera: Dicionário de filas por animal_id
         triagem_service: Serviço de triagem
         reserva_service: Serviço de reservas
         adocao_service: Serviço de adoções
@@ -100,31 +113,42 @@ class SistemaAdocao:
             print(f"❌ Erro ao carregar configurações: {e}")
             sys.exit(1)
         
-        # Inicializa repositório
-        self.repo = AnimalRepository("data/animais.json")
+        # Inicializa repositórios
+        self.animal_repo = AnimalRepository("data/animais.json")
+        self.adotante_repo = AdotanteRepository("data/adotantes.json")
+        self.fila_repo = FilaRepository("data/filas.json")
+        
         try:
-            self.repo.load()
-            print(f"✅ Repositório carregado: {len(self.repo)} animais")
+            self.animal_repo.load()
+            print(f"✅ Repositório de animais carregado: {len(self.animal_repo)} animais")
         except Exception as e:
-            print(f"⚠️  Aviso ao carregar repositório: {e}")
+            print(f"⚠️  Aviso ao carregar animais: {e}")
             print("   Iniciando com repositório vazio...")
         
-        # Lista de adotantes (em memória - poderia ser persistida também)
-        self.adotantes: List[Adotante] = []
+        try:
+            self.adotante_repo.load()
+            print(f"✅ Repositório de adotantes carregado: {len(self.adotante_repo)} adotantes")
+        except Exception as e:
+            print(f"⚠️  Aviso ao carregar adotantes: {e}")
+            print("   Iniciando com repositório vazio...")
         
-        # Filas de espera por animal (em memória)
-        self.filas_espera: dict[str, FilaEspera] = {}
+        try:
+            self.fila_repo.load()
+            print(f"✅ Filas de espera carregadas: {len(self.fila_repo)} filas")
+        except Exception as e:
+            print(f"⚠️  Aviso ao carregar filas: {e}")
+            print("   Iniciando com filas vazias...")
         
         # Inicializa serviços
         self.triagem_service = TriagemService()
         
         duracao_reserva = self.settings["reserva"]["duracao_horas"]
-        self.reserva_service = ReservaService(self.repo, duracao_reserva)
+        self.reserva_service = ReservaService(self.animal_repo, duracao_reserva)
         
-        self.adocao_service = AdocaoService(self.repo)
+        self.adocao_service = AdocaoService(self.animal_repo)
         self.gestao_service = GestaoAnimalService()
         self.relatorio_service = RelatorioService()
-        self.expiracao_job = ExpiracaoReservaJob(self.repo)
+        self.expiracao_job = ExpiracaoReservaJob(self.animal_repo)
         
         print("✅ Todos os serviços inicializados\n")
     
@@ -241,8 +265,8 @@ class SistemaAdocao:
                 )
             
             # Adiciona ao repositório
-            self.repo.add(animal)
-            self.repo.save()
+            self.animal_repo.add(animal)
+            self.animal_repo.save()
             
             print(f"\n✅ Animal cadastrado com sucesso!")
             print(f"   ID: {animal.id}")
@@ -288,7 +312,8 @@ class SistemaAdocao:
                 outros_animais=outros_animais,
             )
             
-            self.adotantes.append(adotante)
+            self.adotante_repo.add(adotante)
+            self.adotante_repo.save()
             
             print(f"\n✅ Adotante cadastrado com sucesso!")
             print(f"   {adotante}")
@@ -305,7 +330,7 @@ class SistemaAdocao:
         print("="*60)
         
         # Lista animais disponíveis
-        disponiveis = self.repo.list(status=AnimalStatus.DISPONIVEL)
+        disponiveis = self.animal_repo.list(status=AnimalStatus.DISPONIVEL)
         
         if not disponiveis:
             print("\n⚠️  Nenhum animal disponível para reserva no momento.")
@@ -324,20 +349,21 @@ class SistemaAdocao:
             animal = disponiveis[escolha]
             
             # Lista adotantes
-            if not self.adotantes:
+            adotantes = list(self.adotante_repo)
+            if not adotantes:
                 print("\n⚠️  Nenhum adotante cadastrado! Cadastre primeiro (opção 2).")
                 return
             
             print("\n📋 Adotantes cadastrados:")
-            for i, adotante in enumerate(self.adotantes, 1):
+            for i, adotante in enumerate(adotantes, 1):
                 print(f"   [{i}] {adotante.nome} - {adotante.idade} anos")
             
             escolha_adotante = int(input("\nEscolha o número do adotante: ")) - 1
-            if escolha_adotante < 0 or escolha_adotante >= len(self.adotantes):
+            if escolha_adotante < 0 or escolha_adotante >= len(adotantes):
                 print("❌ Escolha inválida!")
                 return
             
-            adotante = self.adotantes[escolha_adotante]
+            adotante = adotantes[escolha_adotante]
             
             # Valida elegibilidade
             try:
@@ -349,13 +375,17 @@ class SistemaAdocao:
                 # Pergunta se quer entrar na fila
                 entrar_fila = input("\nDeseja entrar na fila de espera? (S/N): ").strip().upper()
                 if entrar_fila == "S":
-                    # Cria fila se não existir
-                    if animal.id not in self.filas_espera:
-                        self.filas_espera[animal.id] = FilaEspera()
+                    # Pega ou cria fila
+                    fila = self.fila_repo.get_or_create(animal.id)
                     
                     # Calcula score mesmo com política não atendida (para priorização)
                     score_fila = self.triagem_service.compatibilidade.calcular(adotante, animal)
-                    self.filas_espera[animal.id].adicionar(adotante, score_fila)
+                    fila.adicionar(adotante, score_fila)
+                    
+                    # Salva fila
+                    self.fila_repo.update(animal.id, fila)
+                    self.fila_repo.save()
+                    
                     print(f"✅ {adotante.nome} adicionado à fila de espera com {score_fila} pontos")
                 
                 return
@@ -376,7 +406,7 @@ class SistemaAdocao:
         print("="*60)
         
         # Lista animais reservados
-        reservados = self.repo.list(status=AnimalStatus.RESERVADO)
+        reservados = self.animal_repo.list(status=AnimalStatus.RESERVADO)
         
         if not reservados:
             print("\n⚠️  Nenhum animal reservado no momento.")
@@ -437,7 +467,7 @@ class SistemaAdocao:
         print("="*60)
         
         # Lista animais adotados
-        adotados = self.repo.list(status=AnimalStatus.ADOTADO)
+        adotados = self.animal_repo.list(status=AnimalStatus.ADOTADO)
         
         if not adotados:
             print("\n⚠️  Nenhum animal adotado no momento.")
@@ -470,8 +500,8 @@ class SistemaAdocao:
             )
             
             # Salva alterações
-            self.repo.update(animal)
-            self.repo.save()
+            self.animal_repo.update(animal)
+            self.animal_repo.save()
             
             print(f"\n✅ Devolução processada. Status atual: {animal.status.value}")
             
@@ -488,11 +518,12 @@ class SistemaAdocao:
         print("🔥 TOP 5 ANIMAIS MAIS ADOTÁVEIS")
         print("="*60)
         
-        if not self.adotantes:
+        adotantes = list(self.adotante_repo)
+        if not adotantes:
             print("\n⚠️  Nenhum adotante cadastrado para calcular compatibilidade.")
             return
         
-        animais = self.repo.list(status=AnimalStatus.DISPONIVEL)
+        animais = self.animal_repo.list(status=AnimalStatus.DISPONIVEL)
         
         if not animais:
             print("\n⚠️  Nenhum animal disponível.")
@@ -501,7 +532,7 @@ class SistemaAdocao:
         try:
             top = self.relatorio_service.top_animais_adotaveis(
                 animais=animais,
-                adotantes=self.adotantes,
+                adotantes=adotantes,
                 limite=5,
             )
             
@@ -522,7 +553,7 @@ class SistemaAdocao:
         print("📊 TAXA DE ADOÇÕES POR ESPÉCIE/PORTE")
         print("="*60)
         
-        adotados = self.repo.list(status=AnimalStatus.ADOTADO)
+        adotados = self.animal_repo.list(status=AnimalStatus.ADOTADO)
         
         if not adotados:
             print("\n⚠️  Nenhum animal adotado ainda.")
@@ -547,7 +578,7 @@ class SistemaAdocao:
         print("="*60)
         
         try:
-            todos_animais = list(self.repo)
+            todos_animais = list(self.animal_repo)
             tempo = self.relatorio_service.tempo_medio_entrada_adocao(todos_animais)
             
             if tempo is None:
@@ -569,7 +600,7 @@ class SistemaAdocao:
         print("="*60)
         
         try:
-            todos_animais = list(self.repo)
+            todos_animais = list(self.animal_repo)
             resultado = self.relatorio_service.devolucoes_por_motivo(todos_animais)
             
             if not resultado:
@@ -593,7 +624,7 @@ class SistemaAdocao:
         
         # Lista animais em quarentena ou devolvidos
         em_avaliacao = [
-            a for a in self.repo 
+            a for a in self.animal_repo 
             if a.status in (AnimalStatus.QUARENTENA, AnimalStatus.DEVOLVIDO)
         ]
         
@@ -619,8 +650,8 @@ class SistemaAdocao:
             self.gestao_service.reavaliar_quarentena(animal, apto)
             
             # Salva alterações
-            self.repo.update(animal)
-            self.repo.save()
+            self.animal_repo.update(animal)
+            self.animal_repo.save()
             
             print(f"\n✅ Reavaliação concluída. Novo status: {animal.status.value}")
             
@@ -638,6 +669,9 @@ class SistemaAdocao:
         print("="*60)
         
         try:
+            # Guarda os IDs das reservas antes de expirar
+            reservados_antes = [a.id for a in self.animal_repo.list(status=AnimalStatus.RESERVADO)]
+            
             print("\n🔄 Executando job de expiração...")
             total = self.expiracao_job.executar()
             
@@ -647,12 +681,16 @@ class SistemaAdocao:
                 print(f"\n✅ {total} reserva(s) expirada(s) com sucesso!")
                 
                 # Para cada reserva expirada, verifica fila de espera
-                for animal in self.repo.list(status=AnimalStatus.DISPONIVEL):
-                    if animal.id in self.filas_espera:
-                        fila = self.filas_espera[animal.id]
-                        if len(fila) > 0:
+                for animal_id in reservados_antes:
+                    animal = self.animal_repo.get(animal_id)
+                    if animal and animal.status == AnimalStatus.DISPONIVEL:
+                        fila = self.fila_repo.get(animal_id)
+                        if fila and len(fila) > 0:
                             try:
                                 proximo = fila.proximo()
+                                # Salva a fila atualizada
+                                self.fila_repo.update(animal_id, fila)
+                                self.fila_repo.save()
                                 print(f"\n📢 NOTIFICAÇÃO: {proximo.nome}, o animal {animal.nome} está disponível!")
                             except FilaVaziaError:
                                 pass
@@ -666,14 +704,16 @@ class SistemaAdocao:
         print("👀 FILAS DE ESPERA ATUAIS")
         print("="*60)
         
-        if not self.filas_espera:
+        filas = self.fila_repo.list_all()
+        
+        if not filas:
             print("\n⚠️  Nenhuma fila de espera ativa.")
             return
         
         print("\n📋 Filas ativas:\n")
-        for animal_id, fila in self.filas_espera.items():
+        for animal_id, fila in filas.items():
             try:
-                animal = self.repo.get(animal_id)
+                animal = self.animal_repo.get(animal_id)
                 if animal:
                     print(f"   • {animal.nome} ({animal.especie}): {len(fila)} interessados")
                     if len(fila) > 0:
@@ -690,7 +730,9 @@ class SistemaAdocao:
         print("="*60)
         
         try:
-            self.repo.save()
+            self.animal_repo.save()
+            self.adotante_repo.save()
+            self.fila_repo.save()
             print("\n✅ Dados salvos com sucesso!")
             print("👋 Até logo!\n")
         except Exception as e:
