@@ -2,7 +2,8 @@
 
 Projeto final da disciplina de POO — UFCA
 
-<img width="539" height="538" alt="image" src="https://github.com/user-attachments/assets/b9ada86c-9275-4682-9d8e-662e3c4c017c" />
+<img width="421" height="445" alt="image" src="https://github.com/user-attachments/assets/2be25cfc-4065-46d7-9af8-64533db9d809" />
+
 
 
 
