@@ -7,7 +7,6 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
-import json
 
 
 class Observer(ABC):
@@ -57,12 +56,6 @@ class FileLogger(Observer):
     def update(self, evento: str, dados: dict) -> None:
         """Salva evento no arquivo de log."""
         timestamp = datetime.now().isoformat()
-        
-        log_entry = {
-            "timestamp": timestamp,
-            "evento": evento,
-            "dados": dados
-        }
         
         # Salva em formato legível
         with open(self.log_file, "a", encoding="utf-8") as f:
