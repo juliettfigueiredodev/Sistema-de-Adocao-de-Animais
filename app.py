@@ -1,6 +1,6 @@
 """
 Sistema de Adoção de Animais - Interface CLI
-Aplicação principal com menu interativo para gerenciar todo o ciclo de adoção.
+Aplicação principal com menu interativo e sistema de logs.
 """
 
 import sys
@@ -14,6 +14,7 @@ from src.infrastructure.animal_repository import (
 from src.infrastructure.adotante_repository import AdotanteRepository
 from src.infrastructure.fila_repository import FilaRepository
 from src.infrastructure.settings_loader import SettingsLoader
+from src.infrastructure.event_logger import logger
 from src.models.adotante import Adotante
 from src.models.animal import Animal
 from src.models.animal_status import AnimalStatus
@@ -87,30 +88,23 @@ class SistemaAdocao:
     - Inicializar repositórios e serviços
     - Gerenciar o menu interativo
     - Coordenar operações entre diferentes serviços
-    
-    Attributes:
-        animal_repo: Repositório de animais
-        adotante_repo: Repositório de adotantes
-        fila_repo: Repositório de filas de espera
-        settings: Configurações do sistema
-        triagem_service: Serviço de triagem
-        reserva_service: Serviço de reservas
-        adocao_service: Serviço de adoções
-        gestao_service: Serviço de gestão de animais
-        relatorio_service: Serviço de relatórios
-        expiracao_job: Job de expiração de reservas
+    - Registrar logs de eventos importantes
     """
     
     def __init__(self):
         """Inicializa o sistema carregando configurações e repositórios."""
+        logger.log("SISTEMA_INICIADO", mensagem="Iniciando Sistema de Adoção de Animais")
+        
         print("\n🐾 Inicializando Sistema de Adoção de Animais...\n")
         
         # Carrega configurações
         try:
             self.settings = SettingsLoader.carregar()
             print("✅ Configurações carregadas com sucesso")
+            logger.log("CONFIGURACOES_CARREGADAS", sucesso=True)
         except Exception as e:
             print(f"❌ Erro ao carregar configurações: {e}")
+            logger.log("ERRO_CONFIGURACOES", erro=str(e))
             sys.exit(1)
         
         # Inicializa repositórios
@@ -124,6 +118,7 @@ class SistemaAdocao:
         except Exception as e:
             print(f"⚠️  Aviso ao carregar animais: {e}")
             print("   Iniciando com repositório vazio...")
+            logger.log("AVISO_CARREGAMENTO_ANIMAIS", erro=str(e))
         
         try:
             self.adotante_repo.load()
@@ -131,6 +126,7 @@ class SistemaAdocao:
         except Exception as e:
             print(f"⚠️  Aviso ao carregar adotantes: {e}")
             print("   Iniciando com repositório vazio...")
+            logger.log("AVISO_CARREGAMENTO_ADOTANTES", erro=str(e))
         
         try:
             self.fila_repo.load()
@@ -138,6 +134,7 @@ class SistemaAdocao:
         except Exception as e:
             print(f"⚠️  Aviso ao carregar filas: {e}")
             print("   Iniciando com filas vazias...")
+            logger.log("AVISO_CARREGAMENTO_FILAS", erro=str(e))
         
         # Inicializa serviços
         self.triagem_service = TriagemService()
@@ -151,6 +148,11 @@ class SistemaAdocao:
         self.expiracao_job = ExpiracaoReservaJob(self.animal_repo)
         
         print("✅ Todos os serviços inicializados\n")
+        
+        logger.log("SISTEMA_PRONTO",
+                   animais=len(self.animal_repo),
+                   adotantes=len(self.adotante_repo),
+                   filas=len(self.fila_repo))
     
     # ========================================================================
     # MENU PRINCIPAL
@@ -161,6 +163,8 @@ class SistemaAdocao:
         while True:
             try:
                 opcao = input(MENU).strip().upper()
+                
+                logger.log("MENU_OPCAO_SELECIONADA", opcao=opcao)
                 
                 if opcao == "S":
                     self._sair()
@@ -191,13 +195,16 @@ class SistemaAdocao:
                     self._ver_fila_espera()
                 else:
                     print("\n❌ Opção inválida! Tente novamente.\n")
+                    logger.log("MENU_OPCAO_INVALIDA", opcao=opcao)
                     
             except KeyboardInterrupt:
                 print("\n\n⚠️  Interrompido pelo usuário")
+                logger.log("SISTEMA_INTERROMPIDO", motivo="KeyboardInterrupt")
                 self._sair()
                 break
             except Exception as e:
                 print(f"\n❌ Erro inesperado: {e}\n")
+                logger.log("ERRO_INESPERADO", erro=str(e), tipo=type(e).__name__)
     
     # ========================================================================
     # OPERAÇÕES DO MENU
@@ -268,14 +275,24 @@ class SistemaAdocao:
             self.animal_repo.add(animal)
             self.animal_repo.save()
             
+            logger.log("ANIMAL_CADASTRADO",
+                       id=animal.id,
+                       nome=animal.nome,
+                       especie=animal.especie,
+                       raca=animal.raca,
+                       porte=animal.porte,
+                       idade_meses=animal.idade_meses)
+            
             print(f"\n✅ Animal cadastrado com sucesso!")
             print(f"   ID: {animal.id}")
             print(f"   {animal}")
             
         except ValueError as e:
             print(f"❌ Erro de validação: {e}")
+            logger.log("ERRO_CADASTRO_ANIMAL", erro=str(e), tipo="ValidationError")
         except Exception as e:
             print(f"❌ Erro ao cadastrar: {e}")
+            logger.log("ERRO_CADASTRO_ANIMAL", erro=str(e), tipo=type(e).__name__)
     
     def _cadastrar_adotante(self):
         """Opção 2: Cadastrar novo adotante."""
@@ -315,13 +332,21 @@ class SistemaAdocao:
             self.adotante_repo.add(adotante)
             self.adotante_repo.save()
             
+            logger.log("ADOTANTE_CADASTRADO",
+                       nome=adotante.nome,
+                       idade=adotante.idade,
+                       moradia=adotante.moradia,
+                       area_util=adotante.area_util)
+            
             print(f"\n✅ Adotante cadastrado com sucesso!")
             print(f"   {adotante}")
             
         except ValueError as e:
             print(f"❌ Erro de validação: {e}")
+            logger.log("ERRO_CADASTRO_ADOTANTE", erro=str(e), tipo="ValidationError")
         except Exception as e:
             print(f"❌ Erro ao cadastrar: {e}")
+            logger.log("ERRO_CADASTRO_ADOTANTE", erro=str(e), tipo=type(e).__name__)
     
     def _reservar(self):
         """Opção 3: Reservar um animal."""
@@ -334,6 +359,7 @@ class SistemaAdocao:
         
         if not disponiveis:
             print("\n⚠️  Nenhum animal disponível para reserva no momento.")
+            logger.log("RESERVA_SEM_ANIMAIS")
             return
         
         print("\n📋 Animais disponíveis:")
@@ -352,6 +378,7 @@ class SistemaAdocao:
             adotantes = list(self.adotante_repo)
             if not adotantes:
                 print("\n⚠️  Nenhum adotante cadastrado! Cadastre primeiro (opção 2).")
+                logger.log("RESERVA_SEM_ADOTANTES")
                 return
             
             print("\n📋 Adotantes cadastrados:")
@@ -369,8 +396,21 @@ class SistemaAdocao:
             try:
                 score = self.triagem_service.avaliar(adotante, animal)
                 print(f"\n✅ Adotante elegível! Score de compatibilidade: {score}%")
+                
+                logger.log("TRIAGEM_APROVADA",
+                           animal_id=animal.id,
+                           animal_nome=animal.nome,
+                           adotante=adotante.nome,
+                           score=score)
+                
             except PoliticaNaoAtendidaError as e:
                 print(f"\n❌ Adotante não elegível: {e}")
+                
+                logger.log("TRIAGEM_REPROVADA",
+                           animal_id=animal.id,
+                           animal_nome=animal.nome,
+                           adotante=adotante.nome,
+                           motivo=str(e))
                 
                 # Pergunta se quer entrar na fila
                 entrar_fila = input("\nDeseja entrar na fila de espera? (S/N): ").strip().upper()
@@ -386,18 +426,35 @@ class SistemaAdocao:
                     self.fila_repo.update(animal.id, fila)
                     self.fila_repo.save()
                     
+                    logger.log("FILA_ADICIONADO",
+                               animal_id=animal.id,
+                               animal_nome=animal.nome,
+                               adotante=adotante.nome,
+                               score=score_fila,
+                               posicao=len(fila))
+                    
                     print(f"✅ {adotante.nome} adicionado à fila de espera com {score_fila} pontos")
                 
                 return
             
             # Faz a reserva
             self.reserva_service.reservar(animal.id, adotante.nome)
+            
+            logger.log("RESERVA_REALIZADA",
+                       animal_id=animal.id,
+                       animal_nome=animal.nome,
+                       adotante=adotante.nome,
+                       score=score,
+                       validade=animal.reserva_ate)
+            
             print(f"\n✅ Reserva realizada com sucesso para {adotante.nome}!")
             
         except ValueError as e:
             print(f"❌ Entrada inválida: {e}")
+            logger.log("ERRO_RESERVA", erro=str(e), tipo="ValueError")
         except Exception as e:
             print(f"❌ Erro ao reservar: {e}")
+            logger.log("ERRO_RESERVA", erro=str(e), tipo=type(e).__name__)
     
     def _adocao_efetiva(self):
         """Opção 4: Efetivar adoção de animal reservado."""
@@ -410,6 +467,7 @@ class SistemaAdocao:
         
         if not reservados:
             print("\n⚠️  Nenhum animal reservado no momento.")
+            logger.log("ADOCAO_SEM_RESERVAS")
             return
         
         print("\n📋 Animais reservados:")
@@ -442,6 +500,7 @@ class SistemaAdocao:
             }
             
             strategy = strategies.get(estrategia_opcao, TaxaPadrao())
+            taxa_valor = strategy.calcular(animal)
             
             # Efetiva adoção
             contrato = self.adocao_service.adotar(
@@ -450,15 +509,22 @@ class SistemaAdocao:
                 strategy=strategy,
             )
             
-            print("\n" + "="*60)
-            print("✅ ADOÇÃO REALIZADA COM SUCESSO!")
-            print("="*60)
+            logger.log("ADOCAO_EFETIVADA",
+                       animal_id=animal.id,
+                       animal_nome=animal.nome,
+                       adotante=adotante_nome,
+                       taxa_tipo=strategy.nome(),
+                       taxa_valor=taxa_valor)
+            
+            print("\n✅ ADOÇÃO REALIZADA COM SUCESSO!\n")
             print(contrato)
             
         except ValueError as e:
             print(f"❌ Erro: {e}")
+            logger.log("ERRO_ADOCAO", erro=str(e), tipo="ValueError")
         except Exception as e:
             print(f"❌ Erro ao efetivar adoção: {e}")
+            logger.log("ERRO_ADOCAO", erro=str(e), tipo=type(e).__name__)
     
     def _devolucao(self):
         """Opção 5: Processar devolução de animal adotado."""
@@ -471,6 +537,7 @@ class SistemaAdocao:
         
         if not adotados:
             print("\n⚠️  Nenhum animal adotado no momento.")
+            logger.log("DEVOLUCAO_SEM_ADOTADOS")
             return
         
         print("\n📋 Animais adotados:")
@@ -503,14 +570,24 @@ class SistemaAdocao:
             self.animal_repo.update(animal)
             self.animal_repo.save()
             
+            logger.log("DEVOLUCAO_PROCESSADA",
+                       animal_id=animal.id,
+                       animal_nome=animal.nome,
+                       motivo=motivo,
+                       problema=problema,
+                       novo_status=animal.status.value)
+            
             print(f"\n✅ Devolução processada. Status atual: {animal.status.value}")
             
         except ValueError as e:
             print(f"❌ Erro: {e}")
+            logger.log("ERRO_DEVOLUCAO", erro=str(e), tipo="ValueError")
         except TransicaoDeEstadoInvalidaError as e:
             print(f"❌ Transição inválida: {e}")
+            logger.log("ERRO_DEVOLUCAO", erro=str(e), tipo="TransicaoInvalida")
         except Exception as e:
             print(f"❌ Erro ao processar devolução: {e}")
+            logger.log("ERRO_DEVOLUCAO", erro=str(e), tipo=type(e).__name__)
     
     def _top_5(self):
         """Opção 6: Mostrar top 5 animais mais adotáveis."""
@@ -521,12 +598,14 @@ class SistemaAdocao:
         adotantes = list(self.adotante_repo)
         if not adotantes:
             print("\n⚠️  Nenhum adotante cadastrado para calcular compatibilidade.")
+            logger.log("TOP5_SEM_ADOTANTES")
             return
         
         animais = self.animal_repo.list(status=AnimalStatus.DISPONIVEL)
         
         if not animais:
             print("\n⚠️  Nenhum animal disponível.")
+            logger.log("TOP5_SEM_ANIMAIS")
             return
         
         try:
@@ -540,12 +619,15 @@ class SistemaAdocao:
                 print("\n⚠️  Não foi possível calcular o ranking.")
                 return
             
+            logger.log("RELATORIO_TOP5_GERADO", total_animais=len(top))
+            
             print("\n🏆 Ranking de Compatibilidade:\n")
             for i, (animal, score) in enumerate(top, 1):
                 print(f"   {i}º - {animal.nome} ({animal.especie}/{animal.porte}) - {score:.2f}% de compatibilidade média")
             
         except Exception as e:
             print(f"❌ Erro ao gerar ranking: {e}")
+            logger.log("ERRO_TOP5", erro=str(e), tipo=type(e).__name__)
     
     def _taxa_adocao_especie_porte(self):
         """Opção 7: Relatório de taxa de adoções por espécie e porte."""
@@ -557,10 +639,13 @@ class SistemaAdocao:
         
         if not adotados:
             print("\n⚠️  Nenhum animal adotado ainda.")
+            logger.log("RELATORIO_TAXA_SEM_DADOS")
             return
         
         try:
             resultado = self.relatorio_service.taxa_adocoes_por_especie_porte(adotados)
+            
+            logger.log("RELATORIO_TAXA_GERADO", total_adocoes=len(adotados))
             
             print("\n📈 Estatísticas de Adoções:\n")
             for (especie, porte), qtd in sorted(resultado.items()):
@@ -570,6 +655,7 @@ class SistemaAdocao:
             
         except Exception as e:
             print(f"❌ Erro ao gerar relatório: {e}")
+            logger.log("ERRO_RELATORIO_TAXA", erro=str(e), tipo=type(e).__name__)
     
     def _tempo_medio_adocao(self):
         """Opção 8: Relatório de tempo médio entre entrada e adoção."""
@@ -583,15 +669,19 @@ class SistemaAdocao:
             
             if tempo is None:
                 print("\n⚠️  Dados insuficientes para calcular tempo médio.")
+                logger.log("RELATORIO_TEMPO_SEM_DADOS")
                 return
             
             dias = tempo.days
             horas = tempo.seconds // 3600
             
+            logger.log("RELATORIO_TEMPO_GERADO", dias=dias, horas=horas)
+            
             print(f"\n⏳ Tempo médio: {dias} dias e {horas} horas")
             
         except Exception as e:
             print(f"❌ Erro ao calcular tempo médio: {e}")
+            logger.log("ERRO_RELATORIO_TEMPO", erro=str(e), tipo=type(e).__name__)
     
     def _devolucoes_por_motivo(self):
         """Opção 9: Relatório de devoluções agrupadas por motivo."""
@@ -605,16 +695,21 @@ class SistemaAdocao:
             
             if not resultado:
                 print("\n⚠️  Nenhuma devolução registrada.")
+                logger.log("RELATORIO_DEVOLUCOES_SEM_DADOS")
                 return
+            
+            total_devolucoes = sum(resultado.values())
+            logger.log("RELATORIO_DEVOLUCOES_GERADO", total=total_devolucoes)
             
             print("\n📉 Motivos de Devolução:\n")
             for motivo, qtd in sorted(resultado.items(), key=lambda x: x[1], reverse=True):
                 print(f"   • {motivo}: {qtd} devoluções")
             
-            print(f"\n   TOTAL: {sum(resultado.values())} devoluções")
+            print(f"\n   TOTAL: {total_devolucoes} devoluções")
             
         except Exception as e:
             print(f"❌ Erro ao gerar relatório: {e}")
+            logger.log("ERRO_RELATORIO_DEVOLUCOES", erro=str(e), tipo=type(e).__name__)
     
     def _reavaliar_animal(self):
         """Opção 10: Reavaliar animal em quarentena ou devolvido."""
@@ -630,6 +725,7 @@ class SistemaAdocao:
         
         if not em_avaliacao:
             print("\n⚠️  Nenhum animal em quarentena ou devolvido.")
+            logger.log("REAVALIACAO_SEM_ANIMAIS")
             return
         
         print("\n📋 Animais para reavaliação:")
@@ -653,14 +749,23 @@ class SistemaAdocao:
             self.animal_repo.update(animal)
             self.animal_repo.save()
             
+            logger.log("REAVALIACAO_CONCLUIDA",
+                       animal_id=animal.id,
+                       animal_nome=animal.nome,
+                       apto=apto,
+                       novo_status=animal.status.value)
+            
             print(f"\n✅ Reavaliação concluída. Novo status: {animal.status.value}")
             
         except ValueError as e:
             print(f"❌ Erro: {e}")
+            logger.log("ERRO_REAVALIACAO", erro=str(e), tipo="ValueError")
         except TransicaoDeEstadoInvalidaError as e:
             print(f"❌ Transição inválida: {e}")
+            logger.log("ERRO_REAVALIACAO", erro=str(e), tipo="TransicaoInvalida")
         except Exception as e:
             print(f"❌ Erro ao reavaliar: {e}")
+            logger.log("ERRO_REAVALIACAO", erro=str(e), tipo=type(e).__name__)
     
     def _simular_expiracao(self):
         """Opção 11: Simular expiração de reservas."""
@@ -674,6 +779,8 @@ class SistemaAdocao:
             
             print("\n🔄 Executando job de expiração...")
             total = self.expiracao_job.executar()
+            
+            logger.log("EXPIRACAO_EXECUTADA", reservas_expiradas=total)
             
             if total == 0:
                 print("\n✅ Nenhuma reserva expirada.")
@@ -691,12 +798,19 @@ class SistemaAdocao:
                                 # Salva a fila atualizada
                                 self.fila_repo.update(animal_id, fila)
                                 self.fila_repo.save()
+                                
+                                logger.log("FILA_NOTIFICADO",
+                                           animal_id=animal_id,
+                                           animal_nome=animal.nome,
+                                           adotante=proximo.nome)
+                                
                                 print(f"\n📢 NOTIFICAÇÃO: {proximo.nome}, o animal {animal.nome} está disponível!")
                             except FilaVaziaError:
                                 pass
             
         except Exception as e:
             print(f"❌ Erro ao executar job: {e}")
+            logger.log("ERRO_EXPIRACAO", erro=str(e), tipo=type(e).__name__)
     
     def _ver_fila_espera(self):
         """Opção 12: Ver filas de espera atuais."""
@@ -708,7 +822,10 @@ class SistemaAdocao:
         
         if not filas:
             print("\n⚠️  Nenhuma fila de espera ativa.")
+            logger.log("FILAS_VAZIA")
             return
+        
+        logger.log("FILAS_CONSULTADAS", total_filas=len(filas))
         
         print("\n📋 Filas ativas:\n")
         for animal_id, fila in filas.items():
@@ -722,20 +839,28 @@ class SistemaAdocao:
                             print(f"     → Próximo: {proximo.nome}")
             except Exception as e:
                 print(f"   ⚠️  Erro ao processar fila {animal_id}: {e}")
+                logger.log("ERRO_PROCESSAR_FILA", animal_id=animal_id, erro=str(e))
     
     def _sair(self):
         """Salva dados e encerra o sistema."""
         print("\n" + "="*60)
-        print("🚶🏻 ENCERRANDO SISTEMA")
+        print("🚪 ENCERRANDO SISTEMA")
         print("="*60)
         
         try:
             self.animal_repo.save()
             self.adotante_repo.save()
             self.fila_repo.save()
+            
+            logger.log("SISTEMA_ENCERRADO",
+                       animais_salvos=len(self.animal_repo),
+                       adotantes_salvos=len(self.adotante_repo),
+                       filas_salvas=len(self.fila_repo))
+            
             print("\n✅ Dados salvos com sucesso!")
             print("👋 Até logo!\n")
         except Exception as e:
+            logger.log("ERRO_AO_SALVAR", erro=str(e), tipo=type(e).__name__)
             print(f"\n⚠️  Erro ao salvar dados: {e}")
             print("👋 Encerrando mesmo assim...\n")
 
@@ -751,6 +876,7 @@ def main():
         sistema.executar()
     except Exception as e:
         print(f"\n❌ Erro fatal ao inicializar sistema: {e}")
+        logger.log("ERRO_FATAL", erro=str(e), tipo=type(e).__name__)
         sys.exit(1)
 
 
