@@ -27,9 +27,9 @@ class GestaoAnimalService:
         """
         Processa a devolução de um animal adotado.
         
-        Realiza a transição de status obrigatória para DEVOLVIDO e, 
-        caso haja problemas de saúde ou comportamento, move 
-        automaticamente para QUARENTENA.
+        Realiza a transição de status apropriada:
+        - SEM problema: ADOTADO → DEVOLVIDO → DISPONIVEL
+        - COM problema: ADOTADO → DEVOLVIDO → QUARENTENA
         
         Args:
             animal: O animal sendo devolvido.
@@ -62,8 +62,14 @@ class GestaoAnimalService:
                     "Encaminhado automaticamente pós-devolução devido a problemas de saúde/comportamento"
                 )
                 print(f"ALERTA: Animal movido para {animal.status.value}.")
-            
-            # Se não tiver problema, simplesmente permanece como DEVOLVIDO
+            else:
+                # SEM problema: volta para DISPONIVEL
+                print("Sem problemas detectados. Retornando para disponibilidade...")
+                animal.mudar_status(
+                    AnimalStatus.DISPONIVEL,
+                    "Animal devolvido sem problemas - apto para nova adoção"
+                )
+                print(f"✅ Animal está {animal.status.value} para nova adoção.")
 
         except Exception as e:
             print(f"Erro crítico ao mudar status: {e}")
