@@ -59,45 +59,50 @@ pytest tests/test_politica_triagem.py -v
 ##  Estrutura do Projeto
 ```
 ├── data/                        # Dados persistidos
-│   ├── animais.json
-│   └── contratos/
+│   ├── animais.json            # Banco de dados de animais
+│   ├── adotantes.json          # Banco de dados de adotantes
+│   ├── filas.json              # Filas de espera persistidas
+│   └── contratos/              # Contratos de adoção gerados
+│
+├── logs/                        # Logs do sistema
+│   └── sistema.log             # Log de eventos (Observer Pattern)
 │
 ├── src/
 │   ├── infrastructure/          # Configurações e persistência
-│   │   ├── animal_repository.py
-│   │   └── settings_loader.py
+│   │   ├── animal_repository.py     # Repositório de animais
+│   │   ├── adotante_repository.py   # Repositório de adotantes
+│   │   ├── fila_repository.py       # Repositório de filas
+│   │   ├── event_logger.py          # Sistema de logs (Observer)
+│   │   └── settings_loader.py       # Carregador de configurações
 │   │
 │   ├── models/                  # Classes de domínio
-│   │   ├── adotante.py
-│   │   ├── animal.py
-│   │   ├── animal_status.py
-│   │   ├── cachorro.py
-│   │   ├── fila_espera.py
-│   │   ├── gato.py
-│   │   └── pessoa.py
+│   │   ├── adotante.py         # Modelo do adotante
+│   │   ├── animal.py           # Classe base abstrata de animal
+│   │   ├── animal_status.py    # Enum de status e validações
+│   │   ├── cachorro.py         # Modelo específico de cachorro
+│   │   ├── fila_espera.py      # Fila de prioridade (heap)
+│   │   ├── gato.py             # Modelo específico de gato
+│   │   └── pessoa.py           # Classe base de pessoa
 │   │
 │   ├── services/                # Lógica de negócio
-│   │   ├── adocao_service.py
-│   │   ├── compatibilidade_service.py
-│   │   ├── expiracao_reserva.py
-│   │   ├── gestao_animal_service.py
-│   │   ├── relatorio_service.py
-│   │   ├── reserva_service.py
-│   │   ├── taxa_adocao.py
-│   │   └── triagem_service.py
+│   │   ├── adocao_service.py          # Processo de adoção
+│   │   ├── compatibilidade_service.py # Cálculo de compatibilidade
+│   │   ├── expiracao_reserva.py       # Job de expiração
+│   │   ├── gestao_animal_service.py   # Gestão de ciclo de vida
+│   │   ├── relatorio_service.py       # Geração de relatórios
+│   │   ├── reserva_service.py         # Gestão de reservas
+│   │   ├── taxa_adocao.py             # Estratégias de taxa (Strategy)
+│   │   └── triagem_service.py         # Triagem e políticas
 │   │
 │   └── validators/              # Validações e exceções
-│       ├── exceptions.py
-│       └── politica_triagem.py
+│       ├── exceptions.py        # Exceções customizadas
+│       └── politica_triagem.py  # Políticas de validação
 │
 ├── tests/                       # Testes automatizados
 │   ├── interface-teste.py
-│   ├── reserva_animal_status.py
-│   ├── test_compatibilidade_service.py
-│   ├── test_politica_triagem.py
-│   └── test_taxa_adocao.py
+│   └── ...
 │
-├── app.py                       # Arquivo principal
+├── app.py                       # Arquivo principal com CLI
 ├── settings.json                # Configurações do sistema
 ├── LICENSE
 └── README.md
